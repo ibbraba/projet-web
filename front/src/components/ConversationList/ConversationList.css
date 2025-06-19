@@ -1,0 +1,107 @@
+/* src/components/ConversationList/ConversationList.css */
+.conversation-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+.conversation-header {
+  padding: 15px;
+  border-bottom: 1px solid #e9edef;
+}
+
+.conversation-header h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f0f2f5;
+  margin: 10px;
+  border-radius: 8px;
+}
+
+.search-icon {
+  color: #667781;
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+}
+
+.conversation-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.conversation-item:hover {
+  background-color: #f5f6f6;
+}
+
+.conversation-item.unread {
+  background-color: #f0f7ff;
+}
+
+.conversation-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-name {
+  font-size: 15px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-name.bold {
+  font-weight: 600;
+}
+
+.conversation-message {
+  font-size: 13px;
+  color: #667781;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread .conversation-message {
+  color: #111b21;
+  font-weight: 500;
+}
+
+.you-prefix {
+  color: #667781;
+}
+
+.conversation-time {
+  font-size: 12px;
+  color: #667781;
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+.unread .conversation-time {
+  color: #008069;
+}

@@ -1,0 +1,159 @@
+/* src/pages/LoginPage.css */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #fafafa;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 350px;
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  padding: 20px 40px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.logo {
+  font-family: 'Billabong', cursive;
+  font-size: 42px;
+  font-weight: 600;
+  margin: 22px 0;
+}
+
+.login-form {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.login-input {
+  width: 100%;
+  padding: 9px 8px 7px;
+  background-color: #fafafa;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #a8a8a8;
+}
+
+.input-line {
+  height: 1px;
+  background-color: #dbdbdb;
+  margin-top: -1px;
+}
+
+.login-button {
+  width: 100%;
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 7px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.login-button:disabled {
+  background-color: rgba(0, 149, 246, 0.3);
+  cursor: default;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.separator-line {
+  flex: 1;
+  height: 1px;
+  background-color: #dbdbdb;
+}
+
+.separator-text {
+  color: #8e8e8e;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 18px;
+  text-transform: uppercase;
+}
+
+.facebook-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #385185;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.facebook-icon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.forgot-password {
+  color: #00376b;
+  font-size: 12px;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.login-footer {
+  width: 100%;
+  max-width: 350px;
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  padding: 20px;
+  text-align: center;
+}
+
+.legal-text {
+  color: #8e8e8e;
+  font-size: 12px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.signup-text {
+  font-size: 14px;
+  margin: 0;
+}
+
+.signup-link {
+  color: #0095f6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Police Instagram */
+@font-face {
+  font-family: 'Billabong';
+  src: url('https://fonts.cdnfonts.com/css/billabong') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
