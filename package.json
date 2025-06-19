@@ -1,0 +1,22 @@
+{
+  "name": "projet-web",
+  "version": "1.0.0",
+  "description": "Projet final pour LE M1 l'EFREI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibbraba/projet-web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibbraba/projet-web/issues"
+  },
+  "homepage": "https://github.com/ibbraba/projet-web#readme",
+  "dependencies": {
+    "@nestjs/cli": "^11.0.7"
+  }
+}
