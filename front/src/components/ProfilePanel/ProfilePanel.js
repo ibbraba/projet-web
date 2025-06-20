@@ -14,6 +14,11 @@ const ProfilePanel = () => {
      navigate('/editprofile'); // Redirection vers la page de profil
   };
 
+   const handleLogout = (e) => {
+     e.preventDefault();
+     navigate('/');
+  };
+
   return (
     <div className="profile-panel">
       {/* En-tête du profil */}
@@ -24,18 +29,10 @@ const ProfilePanel = () => {
 
       {/* Options principales */}
       <div className="profile-options">
-        <div className="profile-option">
-          <FiUser className="option-icon" />
-          <span>Profil</span>
-        </div>
-        <div className="profile-option">
-          <FiBellOff className="option-icon" />
-          <span>Mettre en sourdine</span>
-        </div>
-        <div className="profile-option">
-          <FiSearch className="option-icon" />
-          <span>Rechercher</span>
-        </div>
+        <button className="edit-button" onClick={handleLogout}>
+          <div className="edit-icon" />
+          <span>Deconnexion</span>
+        </button>
       </div>
 
       <div className="divider"></div>

@@ -157,3 +157,47 @@
   font-weight: normal;
   font-style: normal;
 }
+
+/* Ajouts à Login.css */
+
+/* Styles des erreurs */
+.login-input.error {
+  border-color: #ff4444;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Notification d'authentification */
+.auth-notification {
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.auth-notification.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.auth-notification.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.notification-icon {
+  margin-right: 10px;
+}
+
+/* Bouton désactivé */
+.login-button:disabled {
+  background-color: #b2dfdb;
+  cursor: not-allowed;
+}

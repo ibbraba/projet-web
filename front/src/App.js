@@ -4,10 +4,19 @@ import Index from './pages/index';
 import LoginPage from './pages/Connexion/LoginPage';
 import SignupPage from './pages/inscription/SignupPage';
 import Profile from './pages/Profile/Profile';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, ServerError, from } from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
+import { setContext } from '@apollo/client/link/context';
+
+const client = new ApolloClient({
+  uri: 'http://localhost:4000/graphql',
+  cache: new InMemoryCache(),
+});
 
 const App = () => {
   return (
-      <BrowserRouter>
+    <ApolloProvider client={client}>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
@@ -16,6 +25,7 @@ const App = () => {
           {/* Add more routes as needed */}
         </Routes>
       </BrowserRouter>
+    </ApolloProvider>
   );
 };
 
