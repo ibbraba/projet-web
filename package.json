@@ -18,5 +18,10 @@
   "homepage": "https://github.com/ibbraba/projet-web#readme",
   "dependencies": {
     "@nestjs/cli": "^11.0.7"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.3",
+    "ts-jest": "^29.4.0"
   }
 }

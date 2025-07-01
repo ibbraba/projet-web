@@ -19,18 +19,17 @@ export class ConversationService implements OnModuleInit {
         console.log(this.logServiceName + "Conversation service initialized");
         this.channel = this.rabbitmqService.getChannel();
 
-        await this.channel.assertExchange('test.exchange', 'direct', { durable: true });
+        await this.channel.assertExchange('chatapp.exchange', 'direct', { durable: true });
         await this.channel.assertQueue('conversation.queue', { durable: true });
-        await this.channel.bindQueue('conversation.queue', 'test.exchange', 'conversation.test');
+        await this.channel.bindQueue('conversation.queue', 'chatapp.exchange', 'conversation.req');
 
         await this.channel.assertQueue('conversation.response', { durable: true });
-        await this.channel.bindQueue('conversation.response', 'test.exchange', 'conversation.res');
+        await this.channel.bindQueue('conversation.response', 'chatapp.exchange', 'conversation.res');
 
 
         await this.rabbitmqService.consumeQueue("conversation.queue", (conversation) => this.handleConversation(conversation))
-        //await this.testPublish()
-        //   await this.addParticipant("27eb1726-56aa-4d68-a710-e94f6825084f", "5dc94624-f89e-4faa-ab4d-7951b0fbbba6")
-        //   await this.addParticipant("bdd69dee-10e8-4731-a3c1-e33a0a12e2a2", "5dc94624-f89e-4faa-ab4d-7951b0fbbba6")
+       // await this.testCreateConversation()
+        
 
     }
 
@@ -40,27 +39,27 @@ export class ConversationService implements OnModuleInit {
         switch (operation) {
             case 'create':
                 const createResponse = await this.create(conversation);
-                console.log(this.logServiceName + "New Conversation created");
-                await this.rabbitmqService.publishToExchange("test.exchange", "conversation.res", createResponse)
+                
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", createResponse)
                 break;
 
             case 'update':
                 const updateResponse = await this.update(req.conversation.id, req.conversation);
                 console.log(this.logServiceName + `Conversation with ID ${req.conversation.id} updated`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "conversation.res", updateResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", updateResponse)
                 break;
 
             case 'delete':
                 await this.remove(req.conversation.id);
                 console.log(this.logServiceName + `Conversation with ID  ${req.conversation.id} deleted`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "conversation.res", "Deleted with success")
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success")
                 break;
 
             case 'findOne':
                 const findOneResponse = await this.findOne(req.conversation.id);
                 // Optionally publish result back to another queue
                 console.log(this.logServiceName + `Conversation with Id ${req.conversation.id} found`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "conversation.res", findOneResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse)
                 break;
 
             case 'findAll':
@@ -68,7 +67,7 @@ export class ConversationService implements OnModuleInit {
                 console.log(this.logServiceName + "Find all request received");
 
                 // Optionally publish result back to another queue
-                await this.rabbitmqService.publishToExchange("test.exchange", "conversation.res", findAllResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse)
                 break;
         }
     }
@@ -111,9 +110,31 @@ export class ConversationService implements OnModuleInit {
         });
     }
 
-    async create(data: { title?: string }): Promise<Conversation> {
+    async create(data: { title?: string, participantIds: string[] }): Promise<Conversation> {
+
+        const { title, participantIds } = data;
+
+        const isAlreadyCreated = await this.findExistingConversation(participantIds)
+        if(isAlreadyCreated){
+
+            const conversationCreated = await this.findOne(isAlreadyCreated.id)
+            if(conversationCreated) {
+                console.log(this.logServiceName + "Forwading to already created conversation");
+                return conversationCreated 
+            }
+            
+        }
+
+        console.log(this.logServiceName + "New Conversation created");
         return this.prismaService.conversation.create({
-            data,
+            data: {
+                title,
+                participants: {
+                    create: participantIds.map((userId) => ({
+                        user: { connect: { id: userId } },
+                    })),
+                },
+            },
         });
     }
 
@@ -186,11 +207,12 @@ export class ConversationService implements OnModuleInit {
 
 
     //Test method TODO : Delete
-    async testPublish() {
-        await this.rabbitmqService.publishToExchange('test.exchange', 'conversation.test', {
-            operation: "findOne",
+    async testCreateConversation() {
+        await this.rabbitmqService.publishToExchange('chatapp.exchange', 'conversation.req', {
+            operation: "create",
             conversation: {
-                id: "5dc94624-f89e-4faa-ab4d-7951b0fbbba6",
+                title : "Must fail",
+                participantIds : ["0d95023e-2912-4504-891b-63cb6a7f5e02", "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3"]
 
             },
         });

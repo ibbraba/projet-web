@@ -45,9 +45,9 @@ export class RabbitMQService implements OnModuleInit {
     }
 
     async publishToQueue(queueName: string, data: any) {
-        this.channel.assertExchange('user.exchange', 'direct', { durable: true });
+        this.channel.assertExchange('chatapp.exchange', 'direct', { durable: true });
         this.channel.assertQueue('user.queue');
-        this.channel.bindQueue('user.queue', 'user.exchange', 'user.created');
+        this.channel.bindQueue('user.queue', 'chatapp.exchange', 'user.created');
         await this.channel.assertQueue(queueName, { durable: true });
 
         this.channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), {

@@ -1,0 +1,4 @@
+interface ConversationInputInfo {
+    title : string, 
+    
+}
