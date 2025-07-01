@@ -174,3 +174,48 @@
   font-weight: normal;
   font-style: normal;
 }
+
+/* Ajouts à Form.css */
+
+/* Styles des erreurs */
+.signup-input.error {
+  border-color: #ff4444;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Notification d'inscription */
+.registration-notification {
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.registration-notification.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.registration-notification.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.notification-icon {
+  margin-right: 10px;
+}
+
+/* Bouton désactivé */
+.signup-button:disabled {
+  background-color: #b2dfdb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
