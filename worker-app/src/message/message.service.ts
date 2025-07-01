@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -29,8 +31,8 @@ export class MessagesService implements OnModuleInit {
 
         await this.rabbitmqService.consumeQueue("message.queue", (message) => this.handleMessage(message))
 
-       // await this.testPublishMessage1()
-       // await this.testPublshMessage2()
+        await this.testPublishMessage1()
+        await this.testPublshMessage2()
 
     }
 
@@ -126,8 +128,8 @@ export class MessagesService implements OnModuleInit {
             operation: "create",
             message: {
                 content: "Hello ca va ?",
-                senderId: "27eb1726-56aa-4d68-a710-e94f6825084f",
-                conversationId: "5dc94624-f89e-4faa-ab4d-7951b0fbbba6"
+                senderId: "ae1efa9d-5dff-455c-aa01-34f63a31c029",
+                conversationId: "cb59f39f-9ce6-4988-a319-b970dbaeaaf6"
             },
         });
     }
@@ -138,8 +140,8 @@ export class MessagesService implements OnModuleInit {
             operation: "create",
             message: {
                 content: "Bien et toi? ",
-                senderId: "bdd69dee-10e8-4731-a3c1-e33a0a12e2a2",
-                conversationId: "5dc94624-f89e-4faa-ab4d-7951b0fbbba6"
+                senderId: "eb10e452-4308-4e0c-ba4e-b9d832403dcf",
+                conversationId: "cb59f39f-9ce6-4988-a319-b970dbaeaaf6"
             },
         });
     }

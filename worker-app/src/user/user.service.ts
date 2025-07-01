@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -28,8 +30,8 @@ export class UserService implements OnModuleInit {
 
 
         await this.rabbitmqService.consumeQueue("user.queue", (user) => this.handleUser(user))
-     //   await this.testPublishUser1()
-     //   await this.testPublishUser2()
+        await this.testPublishUser1()
+        await this.testPublishUser2()
 
     }
 
