@@ -1,3 +1,8 @@
+# Ignore all node_modules folders in the repo
+**/node_modules/
+**/dist
+**/build
+
 # compiled output
 /dist
 /node_modules
