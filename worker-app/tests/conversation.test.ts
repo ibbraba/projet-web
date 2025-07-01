@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -98,4 +101,18 @@ describe('Conversation & ConversationParticipant', () => {
     expect(userWithConvos?.conversations.length).toBeGreaterThan(0);
     expect(userWithConvos?.conversations[0].conversation.title).toBe('Project Chat');
   });
+/*
+   it('adds a new participant', async () => {
+    const participant = await service.addParticipant(user2., conversationId);
+    expect(participant).toHaveProperty('id');
+    expect(participant.userId).toBe(userId);
+    expect(participant.conversationId).toBe(conversationId);
+  });
+
+  it('throws if participant already exists', async () => {
+    await expect(service.addParticipant(userId, conversationId))
+      .rejects
+      .toThrow('User is already a participant in this conversation.');
+  });
+  */
 });

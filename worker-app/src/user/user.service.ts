@@ -21,17 +21,17 @@ export class UserService implements OnModuleInit {
         console.log(this.logServiceName + "User service initialized");
         this.channel = this.rabbitmqService.getChannel();
 
-        await this.channel.assertExchange('test.exchange', 'direct', { durable: true });
+        await this.channel.assertExchange('chatapp.exchange', 'direct', { durable: true });
         await this.channel.assertQueue('user.queue', { durable: true });
-        await this.channel.bindQueue('user.queue', 'test.exchange', 'user.test');
+        await this.channel.bindQueue('user.queue', 'chatapp.exchange', 'user.req');
 
         await this.channel.assertQueue('user.response', { durable: true });
-        await this.channel.bindQueue('user.response', 'test.exchange', 'user.res');
+        await this.channel.bindQueue('user.response', 'chatapp.exchange', 'user.res');
 
 
         await this.rabbitmqService.consumeQueue("user.queue", (user) => this.handleUser(user))
-        await this.testPublishUser1()
-        await this.testPublishUser2()
+      //  await this.testPublishUser1()
+       // await this.testPublishUser2()
 
     }
 
@@ -42,26 +42,26 @@ export class UserService implements OnModuleInit {
             case 'create':
                 const createResponse = await this.create(user);
                 console.log(this.logServiceName + "New user created");
-                await this.rabbitmqService.publishToExchange("test.exchange", "user.res", createResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", createResponse)
                 break;
 
             case 'update':
                 const updateResponse = await this.update(req.user.id, req.user);
                 console.log(this.logServiceName + `User with ID ${req.user.id} updated`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "user.res", updateResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", updateResponse)
                 break;
 
             case 'delete':
                 await this.remove(req.user.id);
                 console.log(this.logServiceName + `user with ID  ${req.user.id} deleted`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "user.res", "Deleted with success")
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", "Deleted with success")
                 break;
 
             case 'findOne':
                 const findOneResponse = await this.findOne(req.user.id);
                 // Optionally publish result back to another queue
                 console.log(this.logServiceName + `user with Id ${req.user.id} found`);
-                await this.rabbitmqService.publishToExchange("test.exchange", "user.res", findOneResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findOneResponse)
                 break;
 
             case 'findAll':
@@ -69,7 +69,7 @@ export class UserService implements OnModuleInit {
                 console.log(this.logServiceName + "Find all request received");
 
                 // Optionally publish result back to another queue
-                await this.rabbitmqService.publishToExchange("test.exchange", "user.res", findAllResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findAllResponse)
                 break;
         }
     }
@@ -110,7 +110,7 @@ export class UserService implements OnModuleInit {
     }
 
     async testPublishUser1(){
-          await this.rabbitmqService.publishToExchange('test.exchange', 'user.test', {
+          await this.rabbitmqService.publishToExchange('chatapp.exchange', 'user.req', {
             operation : "create",
             user : { username: "User1",
                 password: "password",
@@ -122,7 +122,7 @@ export class UserService implements OnModuleInit {
     }
 
       async testPublishUser2(){
-          await this.rabbitmqService.publishToExchange('test.exchange', 'user.test', {
+          await this.rabbitmqService.publishToExchange('chatapp.exchange', 'user.req', {
             operation : "create",
             user : { username: "User2",
                 password: "password",
