@@ -1,10 +1,19 @@
+import { GraphQLModule } from '@nestjs/graphql';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {UsersModule} from "./modules/users/users.module";
+import {ConversationsModule} from "./modules/conversations/conversations.module";
+import {MessagesModule} from "./modules/messages/messages.module";
+
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    GraphQLModule.forRoot({
+      autoSchemaFile: true, // Génère le schéma automatiquement
+      playground: true,
+    }),
+    UsersModule,          // Import des modules
+    ConversationsModule,  // → Leurs resolvers sont chargés automatiquement
+    MessagesModule,
+  ],
 })
 export class AppModule {}
