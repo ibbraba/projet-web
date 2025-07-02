@@ -28,8 +28,8 @@ export class ConversationService implements OnModuleInit {
 
 
         await this.rabbitmqService.consumeQueue("conversation.queue", (conversation) => this.handleConversation(conversation))
-       // await this.testCreateConversation()
-        
+        // await this.testCreateConversation()
+
 
     }
 
@@ -38,36 +38,60 @@ export class ConversationService implements OnModuleInit {
 
         switch (operation) {
             case 'create':
-                const createResponse = await this.create(conversation);
-                
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", createResponse)
+                try {
+                    const createResponse = await this.create(conversation);
+                    console.log(this.logServiceName + "New conversation created");
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", createResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error creating conversation: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                }
                 break;
 
             case 'update':
-                const updateResponse = await this.update(req.conversation.id, req.conversation);
-                console.log(this.logServiceName + `Conversation with ID ${req.conversation.id} updated`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", updateResponse)
+                try {
+                    const updateResponse = await this.update(req.conversation.id, req.conversation);
+                    console.log(this.logServiceName + `Conversation with ID ${req.conversation.id} updated`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", updateResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error updating conversation: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    return;
+                }
+
                 break;
 
             case 'delete':
-                await this.remove(req.conversation.id);
-                console.log(this.logServiceName + `Conversation with ID  ${req.conversation.id} deleted`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success")
+                try{
+                    await this.remove(req.conversation.id);
+                    console.log(this.logServiceName + `Conversation with ID  ${req.conversation.id} deleted`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success")                    
+                }catch (error) {
+                    console.error(this.logServiceName + "Error deleting conversation: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                }   
                 break;
 
             case 'findOne':
+                try {
                 const findOneResponse = await this.findOne(req.conversation.id);
-                // Optionally publish result back to another queue
                 console.log(this.logServiceName + `Conversation with Id ${req.conversation.id} found`);
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error finding conversation: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                }
                 break;
 
             case 'findAll':
+                try {
                 const findAllResponse = await this.findAll();
                 console.log(this.logServiceName + "Find all request received");
-
-                // Optionally publish result back to another queue
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error finding all conversations: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                }
                 break;
         }
     }
@@ -115,14 +139,14 @@ export class ConversationService implements OnModuleInit {
         const { title, participantIds } = data;
 
         const isAlreadyCreated = await this.findExistingConversation(participantIds)
-        if(isAlreadyCreated){
+        if (isAlreadyCreated) {
 
             const conversationCreated = await this.findOne(isAlreadyCreated.id)
-            if(conversationCreated) {
+            if (conversationCreated) {
                 console.log(this.logServiceName + "Forwading to already created conversation");
-                return conversationCreated 
+                return conversationCreated
             }
-            
+
         }
 
         console.log(this.logServiceName + "New Conversation created");
@@ -207,14 +231,16 @@ export class ConversationService implements OnModuleInit {
 
 
     //Test method TODO : Delete
+    /*
     async testCreateConversation() {
         await this.rabbitmqService.publishToExchange('chatapp.exchange', 'conversation.req', {
             operation: "create",
             conversation: {
-                title : "Must fail",
-                participantIds : ["0d95023e-2912-4504-891b-63cb6a7f5e02", "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3"]
+                title: "Must fail",
+                participantIds: ["0d95023e-2912-4504-891b-63cb6a7f5e02", "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3"]
 
             },
         });
     }
+    */
 }

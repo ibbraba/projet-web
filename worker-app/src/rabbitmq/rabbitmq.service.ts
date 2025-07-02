@@ -4,7 +4,6 @@
 // rabbitmq.service.ts
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as amqp from 'amqplib';
-import { Console } from 'console';
 import * as dotenv from 'dotenv';
 
 
