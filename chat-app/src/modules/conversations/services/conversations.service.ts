@@ -1,6 +1,6 @@
 import {Injectable, NotFoundException} from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import {Conversation} from "../models/conversation.models";
+import {Conversation} from "../models/conversation.model";
 import {CreateConversationInput} from "../dto/create-conversation.input";
 
 const pubSub = new PubSub();

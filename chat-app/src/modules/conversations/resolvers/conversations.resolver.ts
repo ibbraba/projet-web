@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import {Conversation} from "../models/conversation.models";
+import {Conversation} from "../models/conversation.model";
 import {ConversationsService} from "../services/conversations.service";
 import {CreateConversationInput} from "../dto/create-conversation.input";
 import {UpdateConversationInput} from "../dto/update-conversation";

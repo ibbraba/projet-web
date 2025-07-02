@@ -1,6 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { User } from '../../users/models/user.model';
-import { Conversation } from '../../conversations/models/conversation.models';
+import { Conversation } from '../../conversations/models/conversation.model';
 import {MessageStatus} from "../enums/message-status.enum";
 
 @ObjectType()
