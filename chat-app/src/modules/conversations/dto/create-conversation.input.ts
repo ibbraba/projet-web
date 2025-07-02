@@ -1,9 +1,10 @@
-import { InputType, Field } from '@nestjs/graphql';
+import {InputType, Field, ID} from '@nestjs/graphql';
 import { IsNotEmpty } from 'class-validator';
+import {User} from "../../users/models/user.model";
 
 @InputType()
 export class CreateConversationInput {
-    @Field()
+    @Field(() => [ID])
     @IsNotEmpty()
     participantIds: [] = [];
 
