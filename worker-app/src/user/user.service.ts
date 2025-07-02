@@ -40,36 +40,58 @@ export class UserService implements OnModuleInit {
 
         switch (operation) {
             case 'create':
+                try {
                 const createResponse = await this.create(user);
                 console.log(this.logServiceName + "New user created");
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", createResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error creating user: ", error);    
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }   
                 break;
 
             case 'update':
+                try {
                 const updateResponse = await this.update(req.user.id, req.user);
                 console.log(this.logServiceName + `User with ID ${req.user.id} updated`);
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", updateResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error updating user: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                };
                 break;
 
             case 'delete':
+                try {
                 await this.remove(req.user.id);
                 console.log(this.logServiceName + `user with ID  ${req.user.id} deleted`);
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", "Deleted with success")
+                } catch (error) {
+                    console.error(this.logServiceName + "Error deleting user: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }
                 break;
 
             case 'findOne':
+                try {
                 const findOneResponse = await this.findOne(req.user.id);
-                // Optionally publish result back to another queue
                 console.log(this.logServiceName + `user with Id ${req.user.id} found`);
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findOneResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error finding user: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }
                 break;
 
             case 'findAll':
+                try {
                 const findAllResponse = await this.findAll();
                 console.log(this.logServiceName + "Find all request received");
-
-                // Optionally publish result back to another queue
                 await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findAllResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error finding all users: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }
                 break;
         }
     }
@@ -109,6 +131,7 @@ export class UserService implements OnModuleInit {
         return this.prisma.user.delete({ where: { id } });
     }
 
+    /*
     async testPublishUser1(){
           await this.rabbitmqService.publishToExchange('chatapp.exchange', 'user.req', {
             operation : "create",
@@ -132,4 +155,5 @@ export class UserService implements OnModuleInit {
                 phone: "025604030"  },
         });
     }
+    */
 }
