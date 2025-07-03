@@ -1,20 +1,29 @@
 // src/components/Form/Form.js
-import React from 'react';
+import React, { useState } from 'react';
 import { FaFacebook } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useCreateUser } from '../../gql/queries'; // adapte le chemin si besoin
 import './Form.css';
 
 const Form = () => {
-
   const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  const [createUser, { loading, error, data }] = useCreateUser();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    // Ici vous pourriez ajouter votre logique d'authentification
-    // avant la redirection si nécessaire
-    
-    // Redirection vers la page Chat
-    navigate('/');
+
+    try {
+      await createUser({ variables: { input: { username, email, password, isAdmin: false } } });
+      // Après création, tu peux rediriger
+      navigate('/');
+    } catch (err) {
+      // Optionnel : afficher l'erreur dans le formulaire
+      console.error(err);
+    }
   };
 
   const handleLoginClick = (e) => {
@@ -33,17 +42,11 @@ const Form = () => {
           <div className="input-group">
             <input 
               type="text" 
-              placeholder="Numéro de mobile ou e-mail" 
+              placeholder="e-mail" 
               className="signup-input"
-            />
-            <div className="input-line"></div>
-          </div>
-          
-          <div className="input-group">
-            <input 
-              type="text" 
-              placeholder="Nom complet" 
-              className="signup-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <div className="input-line"></div>
           </div>
@@ -53,6 +56,9 @@ const Form = () => {
               type="text" 
               placeholder="Nom d'utilisateur" 
               className="signup-input"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
             <div className="input-line"></div>
           </div>
@@ -62,16 +68,23 @@ const Form = () => {
               type="password" 
               placeholder="Mot de passe" 
               className="signup-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             <div className="input-line"></div>
           </div>
+
+          {error && <p className="error-message">Erreur : {error.message}</p>}
+          {loading && <p>Inscription en cours...</p>}
+          {data && <p className="success-message">Inscription réussie !</p>}
           
           <div className="terms-notice">
             <p>Les personnes qui utilisent notre service ont pu importer vos coordonnées sur Instagram. <a href="#" className="learn-more">En savoir plus</a></p>
             <p>En vous inscrivant, vous acceptez nos <a href="#" className="learn-more">Conditions</a>, notre <a href="#" className="learn-more">Politique de confidentialité</a> et notre <a href="#" className="learn-more">Politique en matière de cookies</a>.</p>
           </div>
           
-          <button type="submit" className="signup-button">
+          <button type="submit" className="signup-button" disabled={loading}>
             Inscription
           </button>
         </form>
