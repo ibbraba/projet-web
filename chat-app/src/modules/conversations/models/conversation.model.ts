@@ -9,9 +9,6 @@ export class Conversation {
     @Field(() => [ID])
     participantIds: string[];
 
-    @Field(() => [User], { nullable: true })
-    participants?: User[];
-
     @Field()
     title: string;
 
