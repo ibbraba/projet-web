@@ -6,4 +6,9 @@ import { RabbitMQService } from './rabbitmq.service';
     providers: [RabbitMQService],
     exports: [RabbitMQService], // Important pour pouvoir l'utiliser ailleurs
 })
-export class RabbitMQModule {}
+export class RabbitMQModule {
+    constructor() {
+        console.log('Rabbitmq module initialized');
+        
+    }
+}

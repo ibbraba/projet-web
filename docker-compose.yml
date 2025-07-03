@@ -11,19 +11,22 @@ services:
     restart: unless-stopped
   chat-app:
     build:
-      context: ./chat-app
-      dockerfile: Dockerfile
+     context: ./chat-app
+     dockerfile: Dockerfile
     container_name: chat-app
     ports:
-      - "5000:5000"  # External port 5000 mapped to internal port 5000
+    - "5000:3000"  # External port 5000 mapped to internal port 3000
     restart: unless-stopped
     depends_on:
-      - front
-      - rabbitmq
+    - front
+    - rabbitmq
     environment:
       NODE_ENV: production
-      PORT: 5000
-  
+      RABBITMQ_URL: amqp://admin:password123@rabbitmq:5672/
+      PORT: 3000
+    volumes:
+    - ./chat-app:/app
+
 
   worker-app:
     build:

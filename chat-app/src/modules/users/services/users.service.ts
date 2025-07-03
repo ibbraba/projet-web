@@ -1,118 +1,157 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable prettier/prettier */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreateUserInput } from "../dto/create-user.input";
-import { User } from "../models/user.model";
-import { UserStatus } from "../enums/user-status.enum";
-import { PublicUser } from "../models/public-user.model";
+import { CreateUserInput } from '../dto/create-user.input';
+import { User } from '../models/user.model';
+import { UserStatus } from '../enums/user-status.enum';
+import { PublicUser } from '../models/public-user.model';
 import { RabbitMQService } from '../../../core/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class UsersService {
-    constructor(
-        private readonly rabbitMQService: RabbitMQService,
-    ) {}
+    constructor(private readonly rabbitMQService: RabbitMQService) { }
 
+    private readonly userQueue: string = 'user.queue';
+    private readonly userReplyQueue: string = 'user.response';
     private readonly logger = new Logger(UsersService.name);
     private readonly users: User[] = [];
 
-    async updateLastSeen(userId: string): Promise<void> {
-        const user = await this.findUserById(userId);
-        user.lastSeen = new Date();
-
-        try {
-            await this.rabbitMQService.send('user_updates', {
-                eventType: 'LAST_SEEN_UPDATE',
-                userId,
-                timestamp: user.lastSeen.toISOString()
-            });
-            this.logger.debug(`Last seen update sent for user ${userId}`);
-        } catch (error) {
-            this.logger.error(`Failed to send last seen update`, error.stack);
-            // On continue malgré l'erreur RabbitMQ
-        }
-    }
-
     async create(input: CreateUserInput): Promise<User> {
-        const user: User = {
-            id: Date.now().toString(),
+        const req: any = {
             username: input.username,
-            email: input.email,
-            status: UserStatus.ONLINE,
-            lastSeen: new Date(),
-            createdAt: new Date(),
-            isAdmin: input.isAdmin,
+            password: input.password,
+            name: input.name,
+            firstName: input.firstName,
+            mail: input.mail,
+            phone: input.phone,
         };
-
-        this.users.push(user);
-
         try {
-            // Envoi avec réponse attendue
-            const response = await this.rabbitMQService.sendWithReply('user_creation', {
-                user: {
-                    id: user.id,
-                    username: user.username,
-                    email: user.email
-                }
-            });
-
-            this.logger.debug(`User creation acknowledged by service: ${response.serviceName}`);
+            const response = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'create',
+                req,
+            );
+            this.logger.debug(
+                `User creation acknowledged by service: ${this.userQueue}`,
+            );
+            return response;
         } catch (error) {
             this.logger.error('Failed to get creation acknowledgment', error.stack);
-            // On continue quand même la création locale
+            throw new NotFoundException(`Failed to create user: ${error.message}`);
         }
-
-        return user;
     }
 
-    async validateUserOnAuthService(email: string, password: string): Promise<User> {
+    async validateUserOnAuthService(
+        email: string,
+        password: string,
+    ): Promise<User> {
+        const req: any = {
+            email: email,
+            password: password,
+        };
         try {
-            const authResponse = await this.rabbitMQService.sendWithReply('auth_validate', {
-                email,
-                password
-            }, 5000); // Timeout plus court pour l'authentification
-
-            if (!authResponse.valid) {
-                throw new Error('INVALID_CREDENTIALS');
-            }
-
-            return this.findUserByEmail(email);
+            const authResponse = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'login',
+                req,
+            );
+            return authResponse;
         } catch (error) {
             this.logger.error(`Auth validation failed for ${email}`, error.stack);
             throw error;
         }
     }
 
-    // ... (autres méthodes inchangées)
+    async update(userId: string, input: Partial<CreateUserInput>): Promise<User> {
+        const req: any = {
+            id: userId,
+            ...input,
+        };
+        try {
+            const response = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'update',
+                req,
+            );
+            this.logger.debug(
+                `User with ID ${userId} updated in service: ${this.userQueue}`,
+            );
+            return response;
+        } catch (error) {
+            this.logger.error(`Failed to update user with ID ${userId}`, error.stack);
+            throw new NotFoundException(`Failed to update user: ${error.message}`);
+        }
+    }
+
     async findAll(): Promise<User[]> {
-        return this.users;
+        try {
+            const users = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'findAll',
+                {},
+            );
+            this.logger.debug(
+                `Fetched ${users.length} users from service: ${this.userQueue}`,
+            );
+            return users;
+        } catch (error) {
+            this.logger.error('Failed to fetch users', error.stack);
+            throw new NotFoundException(`Failed to fetch users: ${error.message}`);
+        }
     }
 
     public async findUserById(userId: string): Promise<User> {
-        const user = this.users.find(u => u.id === userId);
-        if (!user) {
-            throw new NotFoundException(`User with ID ${userId} not found`);
+        try {
+            const req = {
+                id: userId,
+            };
+            const user = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'findOne',
+                req,
+            );
+            this.logger.debug(
+                `User with ID ${userId} fetched from service: ${this.userQueue}`,
+            );
+            if (!user) {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+            return user;
+        } catch (error) {
+            this.logger.error(`Failed to fetch user with ID ${userId}`, error.stack);
+            throw new NotFoundException(`Failed to fetch user: ${error.message}`);
         }
-        return user;
     }
 
-    async refreshUserData(user: User): Promise<User> {
-        return this.findUserById(user.id);
-    }
-
-    async findPublicProfile(userId: string): Promise<PublicUser> {
-        const user = await this.findUserById(userId);
-        return {
-            id: user.id,
-            username: user.username,
-            avatarUrl: user.avatarUrl,
-            createdAt: user.createdAt
-        };
-    }
 
     public async findUserByEmail(userEmail: string): Promise<User> {
-        const user = this.users.find(u => u.email === userEmail);
-        if (!user) {
-            throw new NotFoundException(`User with email ${userEmail} not found`);
+        try {
+            const req = {
+                mail: userEmail,
+            };
+            const user = await this.rabbitMQService.sendWithReply(
+                this.userQueue,
+                this.userReplyQueue,
+                'findByEmail',
+                req,
+            );
+            this.logger.debug(
+                `User with mail ${userEmail} fetched from service: ${this.userQueue}`,
+            );
+            if (!user) {
+                throw new NotFoundException(`User with ID ${userEmail} not found`);
+            }
+            return user;
+        } catch (error) {
+            this.logger.error(`Failed to fetch user with ID ${userEmail}`, error.stack);
+            throw new NotFoundException(`Failed to fetch user: ${error.message}`);
         }
-        return user;
     }
+
 }
