@@ -15,19 +15,12 @@ export class MessagesResolver {
         private messagesService: MessagesService
     ) {}
 
-    @Query(() => [Message], { name: 'getMessages', description: 'Get all messages' })
-    async getMessages(
-        @Args('conversationId') conversationId: string,
-        @Args('limit', { nullable: true }) limit?: number
-    ) {
-        return this.messagesService.findMessagesByConversation(conversationId, limit);
-    }
 
     @Mutation(() => Message, { name: 'sendMessage', description: 'Sends a message' })
     async sendMessage(
         @Args('input') input: SendMessageInput
     ) {
-        const message = this.messagesService.sendMessage(input)
+        const message = this.messagesService.createMessage(input)
         await this.pubSub.publish('MESSAGE_RECEIVED', {
             messageReceived: message,
         });

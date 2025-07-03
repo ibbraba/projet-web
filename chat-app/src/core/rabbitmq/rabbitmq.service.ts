@@ -7,10 +7,9 @@ export class RabbitMQService {
     private connection: Connection;
     private channel: Channel;
     private readonly url: string;
-    private readonly replyQueue = 'amq.rabbitmq.reply-to'; // Queue spéciale pour les réponses
 
     constructor() {
-        this.url = process.env.RABBITMQ_URL || 'amqp://localhost';
+        this.url = process.env.RABBITMQ_URL || 'amqp://admin:password123@rabbitmq:5672/';
         this.initialize().catch(err => {
             this.logger.error('RabbitMQ initialization error', err.stack);
         });
@@ -18,11 +17,13 @@ export class RabbitMQService {
 
     private async initialize() {
         try {
+            console.log('Initializing RabbitMQ service...');
+            console.log('Connecting to RabbitMQ at', this.url);
             this.connection = await connect(this.url);
             this.channel = await this.connection.createChannel();
 
             // On utilise la queue pré-définie pour les réponses
-            await this.channel.assertQueue(this.replyQueue, { exclusive: true });
+            await this.channel.assertExchange('chatapp.exchange', 'direct', { durable: true });
 
             this.logger.log('RabbitMQ service initialized');
         } catch (error) {
@@ -31,15 +32,16 @@ export class RabbitMQService {
         }
     }
 
-    async sendWithReply(queue: string, message: any, timeoutMs = 10000): Promise<any> {
-        const correlationId = Math.random().toString() + Date.now().toString();
+    async sendWithReply(queue: string, replyQueue : string, operation : string, data: any, timeoutMs = 10000): Promise<any> {
+        const requestId = Math.random().toString() + Date.now().toString();
 
         return new Promise(async (resolve, reject) => {
             try {
                 // Configurer le consommateur pour la réponse
-                const consumer = await this.channel.consume(this.replyQueue, (msg) => {
-                    if (msg.properties.correlationId === correlationId) {
+                const consumer = await this.channel.consume(replyQueue, (msg) => {
+                    if (msg.requestId === requestId) {
                         clearTimeout(timeout);
+                        this.logger.debug(`Received reply for requestId ${requestId}`);
                         this.channel.ack(msg);
                         resolve(JSON.parse(msg.content.toString()));
                     }
@@ -48,13 +50,15 @@ export class RabbitMQService {
                 // Envoyer le message
                 this.channel.sendToQueue(
                     queue,
-                    Buffer.from(JSON.stringify(message)),
+                    Buffer.from(JSON.stringify(data)),
                     {
-                        correlationId,
-                        replyTo: this.replyQueue,
+                        requestId: requestId,
+                        operation: operation,
+                        replyQueue: replyQueue,
                         persistent: true
                     }
                 );
+                this.logger.debug(`Message sent to ${queue} with requestId ${requestId}`);
 
                 // Timeout pour éviter les attentes infinies
                 const timeout = setTimeout(() => {
@@ -81,6 +85,31 @@ export class RabbitMQService {
             throw error;
         }
     }
+    /*
+     async consumeQueue(queue: string, handler: (message: any) => Promise<void> | void,)
+    {
+        await this.channel.assertQueue(queue, { durable: true });
+
+        this.channel.consume(
+            queue,
+            async (msg) => {
+                if (msg) {
+                    try {
+                        const content = JSON.parse(msg.content.toString());
+                        await handler(content);
+                        this.channel.ack(msg);
+                    } catch (err) {
+                        console.error(`Error handling message in ${queue}`, err);
+                        this.channel.nack(msg, false, false); // discard
+                    }
+                }
+            },
+            { noAck: false }
+        );
+
+        console.log(`Consuming from queue: ${queue}`);
+    }
+        */
 
     async close() {
         try {

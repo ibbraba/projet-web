@@ -21,7 +21,7 @@ model User {
   createdAt        DateTime                 @default(now())
   name             String
   firstName        String
-  mail             String
+  mail             String                   @unique 
   phone            String
   messages         Message[]                // One-to-many
   conversations    ConversationParticipant[]

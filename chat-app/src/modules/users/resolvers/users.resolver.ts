@@ -19,27 +19,31 @@ export class UsersResolver {
         return this.usersService.findAll();
     }
 
+    /*
     @Query(() => User, { name: 'getMe', description: 'Fetch current user', })
     @UseGuards(GqlAuthGuard) // Protection par garde JWT
     async getMe(@CurrentUser() user: User) {
         return this.usersService.refreshUserData(user); // Optionnel : données fraîches
     }
-
+    */
+    // Note: getMe is commented out because it is not used in the current context.
     @Query(() => User, { name: 'getUser', description: 'Fetch one user by id', })
     @UseGuards(GqlAuthGuard, GqlAdminGuard)
     async getUser(@Args('id') id: string, @CurrentUser() currentUser: User) {
         // 1. L'admin peut tout voir
-        if (currentUser.isAdmin) {
+       /* if (currentUser.isAdmin) {
             return this.usersService.findUserById(id);
         }
-
+        */
         // 2. Un utilisateur peut voir son propre profil complet
         if (currentUser.id === id) {
             return this.usersService.findUserById(id);
         }
 
         // 3. Pour les autres cas: retourner seulement les informations publiques
+        /*
         return this.usersService.findPublicProfile(id);
+        */
     }
 
     @Mutation(() => User, { name: 'createUser', description: 'Create one user', }) // Convention camelCase

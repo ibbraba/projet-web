@@ -1,63 +1,48 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {RabbitMQService} from "../../../core/rabbitmq/rabbitmq.service";
-import {Message} from "../models/message.model";
-import {SendMessageInput} from "../dto/send-message.input";
+import { RabbitMQService } from "../../../core/rabbitmq/rabbitmq.service";
+import { Message } from "../models/message.model";
+import { SendMessageInput } from "../dto/send-message.input";
 
 
 @Injectable()
 export class MessagesService {
     private readonly logger = new Logger(MessagesService.name);
+    public readonly messageQueue: string = 'message.queue';
+    public readonly messageReplyQueue: string = 'message.response';
 
-    constructor(private readonly rabbitMQService: RabbitMQService) {}
+    constructor(private readonly rabbitMQService: RabbitMQService) { }
 
-    async sendMessage(input: SendMessageInput): Promise<Message> {
+    async createMessage(input: SendMessageInput): Promise<Message> {
         try {
-            // 1. Envoyer la demande à RabbitMQ
-            const response = await this.rabbitMQService.sendWithReply('message.send', {
+
+            const request = {
                 content: input.content,
                 senderId: input.senderId,
                 conversationId: input.conversationId
-            });
+            };
+            const response = await this.rabbitMQService.sendWithReply(this.messageQueue, this.messageReplyQueue, 'create', request);
 
-            // 2. Publier l'événement de création
-            await this.publishMessageCreated(response.message);
-
-            return response.message;
+            return response;
         } catch (error) {
             this.logger.error(`Failed to send message: ${error.message}`, error.stack);
             throw new Error('Could not send message');
         }
     }
 
-    private async publishMessageCreated(message: Message): Promise<void> {
+    private async updateMessage(messageId: string, content: string): Promise<void> {
         try {
-            await this.rabbitMQService.send('message.created', {
-                event: 'MESSAGE_CREATED',
-                data: {
-                    messageCreated: message
-                }
-            });
-        } catch (error) {
+            const request = {
+                content: content,
+                messageId: messageId
+            };
+            const response = await this.rabbitMQService.sendWithReply(this.messageQueue, this.messageReplyQueue, 'update', request);
+            return response
+        }
+        catch (error) {
             this.logger.error(`Failed to publish message: ${error.message}`);
             // Système de retry pourrait être implémenté ici
         }
     }
 
-    async findMessagesByConversation(
-        conversationId: string,
-        limit: number = 20
-    ): Promise<Message[]> {
-        try {
-            // 1. Envoyer la demande
-            const response= await this.rabbitMQService.sendWithReply('message.findByConversation', {
-                conversationId,
-                limit
-            });
 
-            return response.messages;
-        } catch (error) {
-            this.logger.error(`Failed to find messages: ${error.message}`);
-            throw new Error('Could not retrieve messages');
-        }
-    }
 }
