@@ -1,14 +1,15 @@
 // src/pages/LoginPage.js
 import React, { useState } from 'react';
-import { FaFacebook, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { useLogin } from '../../gql/queries'; // adapte le chemin si besoin
 import './Login.css';
 
 const Login = () => {
   const navigate = useNavigate();
   const [credentials, setCredentials] = useState({
-    email: 'junior',
-    password: 'junior'
+    email: '',
+    password: ''
   });
   const [errors, setErrors] = useState({
     email: false,
@@ -17,13 +18,15 @@ const Login = () => {
   const [authStatus, setAuthStatus] = useState(null); // null, 'success', 'error'
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Apollo mutation hook
+  const [loginMutation] = useLogin();
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
       ...prev,
       [name]: value
     }));
-    // Reset error when typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -51,33 +54,26 @@ const Login = () => {
 
     setIsSubmitting(true);
 
-    // Simuler une requête API
     try {
-      // Remplacez ceci par votre vraie logique d'authentification
-      const isAuthenticated = await mockAuthAPI(credentials.email, credentials.password);
-      
-      if (isAuthenticated) {
+      const { data } = await loginMutation({
+        variables: { input: { email: credentials.email, password: credentials.password } }
+      });
+
+      if (data?.login?.access_token) {
         setAuthStatus('success');
-        setTimeout(() => navigate('/chat'), 1500); // Redirection après notification
+        // Tu peux stocker le token dans localStorage ou contexte global ici
+        localStorage.setItem('token', data.login.access_token);
+        // Redirection après un court délai
+        setTimeout(() => navigate('/chat'), 1500);
       } else {
         setAuthStatus('error');
       }
     } catch (error) {
-      setAuthStatus('error');
       console.error("Erreur d'authentification:", error);
+      setAuthStatus('error');
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Fonction de simulation d'API
-  const mockAuthAPI = (email, password) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simulation: valide si email contient '@' et password > 5 caractères
-        resolve(email.includes('@') && password.length > 5);
-      }, 1000);
-    });
   };
 
   const handleSignupClick = (e) => {
@@ -90,7 +86,6 @@ const Login = () => {
       <div className="login-box">
         <h1 className="logo">Blink</h1>
         
-        {/* Notification d'authentification */}
         {authStatus && (
           <div className={`auth-notification ${authStatus}`}>
             {authStatus === 'success' ? (
@@ -112,10 +107,11 @@ const Login = () => {
             <input 
               type="text" 
               name="email"
-              placeholder="Num. téléphone, nom de profil ou e-mail" 
+              placeholder="e-mail" 
               className={`login-input ${errors.email ? 'error' : ''}`}
               value={credentials.email}
               onChange={handleChange}
+              autoComplete="username"
             />
             <div className="input-line"></div>
             {errors.email && <span className="error-message">Ce champ est requis</span>}
@@ -129,6 +125,7 @@ const Login = () => {
               className={`login-input ${errors.password ? 'error' : ''}`}
               value={credentials.password}
               onChange={handleChange}
+              autoComplete="current-password"
             />
             <div className="input-line"></div>
             {errors.password && <span className="error-message">Ce champ est requis</span>}
