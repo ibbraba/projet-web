@@ -1,39 +1,33 @@
-import {Inject, Injectable, Logger, NotFoundException} from '@nestjs/common';
-import {PubSub} from 'graphql-subscriptions';
-import {CreateUserInput} from "../dto/create-user.input";
-import {User} from "../models/user.model";
-import {UserStatus} from "../enums/user-status.enum";
-import {ClientProxy} from "@nestjs/microservices";
-import {lastValueFrom, timeout} from "rxjs";
-import {PublicUser} from "../models/public-user.model";
-
-const pubSub = new PubSub();
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CreateUserInput } from "../dto/create-user.input";
+import { User } from "../models/user.model";
+import { UserStatus } from "../enums/user-status.enum";
+import { PublicUser } from "../models/public-user.model";
+import { RabbitMQService } from '../../../core/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class UsersService {
     constructor(
-        @Inject('RABBITMQ_SERVICE') private rabbitClient: ClientProxy,
-    ) {
-    }
-    private readonly logger = new Logger(UsersService.name); // Initialisation du logger
-    private readonly users: User[] = []; // En vrai, utilisez TypeORM/Mongoose
+        private readonly rabbitMQService: RabbitMQService,
+    ) {}
+
+    private readonly logger = new Logger(UsersService.name);
+    private readonly users: User[] = [];
 
     async updateLastSeen(userId: string): Promise<void> {
-        const updateEvent = {
-            userId,
-            lastLogin: new Date().toISOString(),
-            eventTime: new Date().toISOString() // Bonus : timestamp supplémentaire
-        };
+        const user = await this.findUserById(userId);
+        user.lastSeen = new Date();
 
         try {
-            await lastValueFrom(
-                this.rabbitClient.emit('user_updates', updateEvent).pipe(
-                    timeout(5000) // Timeout après 5s
-                ));
-            this.logger.log(`Last seen updated for ${userId}`); // Bonus : logging
+            await this.rabbitMQService.send('user_updates', {
+                eventType: 'LAST_SEEN_UPDATE',
+                userId,
+                timestamp: user.lastSeen.toISOString()
+            });
+            this.logger.debug(`Last seen update sent for user ${userId}`);
         } catch (error) {
-            this.logger.error(`Failed to update last seen for ${userId}`, error.stack);
-            throw new Error('USER_UPDATE_FAILED');
+            this.logger.error(`Failed to send last seen update`, error.stack);
+            // On continue malgré l'erreur RabbitMQ
         }
     }
 
@@ -41,7 +35,7 @@ export class UsersService {
         const user: User = {
             id: Date.now().toString(),
             username: input.username,
-            email: input.email, // Implémentez cette méthode
+            email: input.email,
             status: UserStatus.ONLINE,
             lastSeen: new Date(),
             createdAt: new Date(),
@@ -49,9 +43,45 @@ export class UsersService {
         };
 
         this.users.push(user);
+
+        try {
+            // Envoi avec réponse attendue
+            const response = await this.rabbitMQService.sendWithReply('user_creation', {
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    email: user.email
+                }
+            });
+
+            this.logger.debug(`User creation acknowledged by service: ${response.serviceName}`);
+        } catch (error) {
+            this.logger.error('Failed to get creation acknowledgment', error.stack);
+            // On continue quand même la création locale
+        }
+
         return user;
     }
 
+    async validateUserOnAuthService(email: string, password: string): Promise<User> {
+        try {
+            const authResponse = await this.rabbitMQService.sendWithReply('auth_validate', {
+                email,
+                password
+            }, 5000); // Timeout plus court pour l'authentification
+
+            if (!authResponse.valid) {
+                throw new Error('INVALID_CREDENTIALS');
+            }
+
+            return this.findUserByEmail(email);
+        } catch (error) {
+            this.logger.error(`Auth validation failed for ${email}`, error.stack);
+            throw error;
+        }
+    }
+
+    // ... (autres méthodes inchangées)
     async findAll(): Promise<User[]> {
         return this.users;
     }
@@ -64,14 +94,12 @@ export class UsersService {
         return user;
     }
 
+    async refreshUserData(user: User): Promise<User> {
+        return this.findUserById(user.id);
+    }
+
     async findPublicProfile(userId: string): Promise<PublicUser> {
-        const user = this.users.find(u => u.id === userId);
-
-        if (!user) {
-            throw new NotFoundException(`User with ID ${userId} not found`);
-        }
-
-        // Convertit User en PublicUser
+        const user = await this.findUserById(userId);
         return {
             id: user.id,
             username: user.username,
@@ -83,18 +111,8 @@ export class UsersService {
     public async findUserByEmail(userEmail: string): Promise<User> {
         const user = this.users.find(u => u.email === userEmail);
         if (!user) {
-            throw new NotFoundException(`User with ID ${userEmail} not found`);
+            throw new NotFoundException(`User with email ${userEmail} not found`);
         }
         return user;
     }
-
-    async refreshUserData(user: User): Promise<User> {
-        return this.findUserById(user.id);
-    }
-
-    async validate(id: string): Promise<User> {
-        return this.findUserById(id);
-    }
-
-    // ... autres méthodes
 }

@@ -1,5 +1,5 @@
 import { Resolver, Subscription, Args } from '@nestjs/graphql';
-import { Message } from '../models/message.models';
+import { Message } from '../models/message.model';
 import {Inject} from "@nestjs/common";
 import {PUB_SUB} from "../../../common/constants";
 import {PubSub} from "graphql-subscriptions"; // Utilisez un token constant

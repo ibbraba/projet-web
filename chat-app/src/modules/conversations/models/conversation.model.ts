@@ -6,7 +6,7 @@ export class Conversation {
     @Field(() => ID)
     id: string;
 
-    @Field()
+    @Field(() => [User])
     participants: User[] = [];
 
     @Field()
