@@ -1,0 +1,58 @@
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  AWAY
+}
+
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  lastSeen: String!
+  status: UserStatus!
+  createdAt: String!
+  avatarUrl: String
+  isAdmin: Boolean!
+}
+
+type PublicUser {
+  id: ID!
+  username: String!
+  avatarUrl: String
+  createdAt: String!
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  id: ID!
+  username: String
+  email: String
+  avatarUrl: String
+  status: UserStatus
+}
+
+type AuthPayload {
+  access_token: String!
+  user: User!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Query {
+  getUsers: [User!]!
+  getMe: User!
+  getUser(id: ID!): User!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  login(input: LoginInput!): AuthPayload!
+}
