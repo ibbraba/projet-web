@@ -7,7 +7,7 @@ import {NotificationType} from "../enums/notification-type.enum";
 export class CreateNotificationInput {
     @Field(() => User)
     @IsNotEmpty()
-    receiver: User;
+    recipient: User;
 
     @Field(() => User, { nullable: true })
     sender?: User;

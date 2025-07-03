@@ -31,7 +31,7 @@ export class NotificationsResolver {
     }
 
     @Mutation(() => Notification, { name: 'markNotificationAsRead' })
-    async markAsRead(
+    async markNotificationAsRead(
         @Args('id') id: string
     ): Promise<void> {
         return this.notificationsService.markAsRead(id);
