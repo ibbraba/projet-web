@@ -15,9 +15,10 @@ git clone https://github.com/ibbraba/projet-web
 
 Puis lancez l'application en utilisant cette commande 
 ```
-docker compose up -d 
+docker compose up --build
 ``` 
 
+Attendre que tous les conteneurs soient initialisés. Le worker renverra une erreur jusqu'a l'initialisation du serveur RabbitMQ
 
 
 

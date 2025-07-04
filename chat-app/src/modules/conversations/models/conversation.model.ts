@@ -1,5 +1,6 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import {User} from "../../users/models/user.model";
+import { Message } from '../../messages/models/message.model';
 
 @ObjectType()
 export class Conversation {
@@ -12,14 +13,11 @@ export class Conversation {
     @Field(() => [User], { nullable: true })
     participants?: User[];
 
+    @Field(() => [Message], { nullable: true })
+    messages?: Message[];
+
     @Field()
     title: string;
-
-    @Field({ nullable: true })
-    lastMessage: string;
-
-    @Field()
-    unreadCount: number;
 
     @Field()
     createdAt: Date;
