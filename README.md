@@ -40,3 +40,21 @@ Si l'API a besoin de données, elle emet un message dans une queue qui sera lue 
 
 ### Worker Nest.js et base de données 
 Le worker consomme des messages du broker ou sont indiqués l'objet et l'operation souhaitée. Il effectue l'operation puis renvoie un message de succès ou d'erreur dans une nouvelle queue.
+
+### TEST
+Dans ce projet, on a des tests pour chaque module que l'on retrouve dans le dossier Chat-App.
+Par exemple, dans le module user, on a :
+
+    user.service.spec.ts qui est un fichier de test unitaire pour le service UserService,
+
+    et user.integration.spec.ts qui est un fichier de test d'intégration pour le service User.
+
+On retrouve ce format de fichiers également dans les modules messages et conversation.
+Pour lancer les tests, il faut aller dans le dossier Chat-App :
+```
+cd chat-app
+```
+Et exécuter la commande suivante :
+```
+npm run test
+``` 
