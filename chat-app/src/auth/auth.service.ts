@@ -7,6 +7,8 @@ import { User } from '../modules/users/models/user.model';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { LoginInput } from './dto/login.input';
+import dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,8 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.usersService.findUserByEmail(email);
+    console.log(user);
+    
     if (user && (await bcrypt.compare(pass, user.password))) {
       return user;
     }
@@ -30,11 +34,12 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign({
         sub: user.id,
-        email: user.email,
-      }),
+        email: user.mail,
+      
+      }, { secret : process.env.JWT_SECRET }),
       user: {
         id: user.id,
-        email: user.email,
+        mail: user.mail,
         lastLogin: new Date(), // Mise à jour locale (optionnel)
       },
     };

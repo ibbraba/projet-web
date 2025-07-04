@@ -7,6 +7,7 @@ import * as amqp from 'amqplib';
 import * as dotenv from 'dotenv';
 
 
+
 @Injectable()
 export class RabbitMQService implements OnModuleInit {
     public channel: amqp.Channel;
@@ -29,7 +30,7 @@ export class RabbitMQService implements OnModuleInit {
 
         await this.publishToExchange('test.exchange', 'test.created', {
             message: Buffer.from('Hello from rabbitmq-wrapper!'),
-        });
+        }, 'test.requestId');
 
 
         console.log('✅ Message published');
@@ -58,18 +59,22 @@ export class RabbitMQService implements OnModuleInit {
     async publishToExchange(
         exchangeName: string,
         routingKey: string,
-        data: any,) {
+        data: any, requestId : string){
 
         await this.channel.assertExchange(exchangeName, 'direct', { durable: true });
 
         this.channel.publish(
             exchangeName,
             routingKey,
-            Buffer.from(JSON.stringify(data)),
-            { persistent: true },
+            Buffer.from(JSON.stringify({
+                requestId: requestId,
+                data: data,
+            })),
+            {   persistent: true,  
+            },
         );
 
-        console.log(`📤 Published to exchange [${exchangeName}] with routingKey [${routingKey}]`);
+        console.log(`📤 Reply to request [${requestId}] sent to exchange [${exchangeName}] with routingKey [${routingKey}]`);
     }
 
     async consumeQueue(queue: string, handler: (message: any) => Promise<void> | void,)
@@ -80,6 +85,7 @@ export class RabbitMQService implements OnModuleInit {
             queue,
             async (msg) => {
                 if (msg) {
+                    console.log(`📥 Consumed message from queue [${queue}]:`, msg.content.toString());
                     try {
                         const content = JSON.parse(msg.content.toString());
                         await handler(content);
