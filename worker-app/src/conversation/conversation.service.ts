@@ -62,37 +62,38 @@ export class ConversationService implements OnModuleInit {
                 break;
 
             case 'delete':
-                try{
+                try {
                     await this.remove(data.id);
                     console.log(this.logServiceName + `Conversation with ID  ${data.id} deleted`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success", requestId)                    
-                }catch (error) {
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success", requestId)
+                } catch (error) {
                     console.error(this.logServiceName + "Error deleting conversation: ", error);
                     await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
-                }   
+                }
                 break;
 
             case 'findOne':
                 try {
-                const findOneResponse = await this.findOne(data.id);
-                console.log(this.logServiceName + `Conversation with Id ${data.id} found`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse, requestId)
+                    const findOneResponse = await this.findOne(data.id);
+                    console.log(this.logServiceName + `Conversation with Id ${data.id} found`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding conversation: ", error);
                     await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }
                 break;
 
-            case 'findAll':
+            case 'findUserConversations':
                 try {
-                const findAllResponse = await this.findAll();
-                console.log(this.logServiceName + "Find all request received");
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse, requestId)
+                    const findAllResponse = await this.findUserConversations(data.userId);
+                    console.log(this.logServiceName + "Find all request received");
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding all conversations: ", error);
                     await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }
                 break;
+            
         }
     }
 
@@ -138,17 +139,20 @@ export class ConversationService implements OnModuleInit {
 
         const { title, participantIds } = data;
 
+        /*
         const isAlreadyCreated = await this.findExistingConversation(participantIds)
         if (isAlreadyCreated) {
 
+            throw new Error("Conversation already exists with these participants");
+            
             const conversationCreated = await this.findOne(isAlreadyCreated.id)
             if (conversationCreated) {
                 console.log(this.logServiceName + "Forwading to already created conversation");
                 return conversationCreated
             }
-
+            
         }
-
+        */
         console.log(this.logServiceName + "New Conversation created");
         return this.prismaService.conversation.create({
             data: {
@@ -215,18 +219,29 @@ export class ConversationService implements OnModuleInit {
             include: {
                 participants: true,
             },
+            take : 1
         });
-
+        /*
         // Filter to only those conversations that include exactly these users
         const exactMatch = conversations.find((conversation) => {
+            if (!conversation.participants) return false;
+
+            if (!Array.isArray(conversation.participants)) {
+                return false;
+            }
+
+            if (!userIds || userIds.length === 0) {
+                return false; // No userIds provided, cannot match
+            }
             const participantIds = conversation.participants.map(p => p.userId);
             return (
-                participantIds.length === userIds.length &&
+                participantIds && participantIds.length === userIds.length &&
                 userIds.every(id => participantIds.includes(id))
             );
         });
+        */
 
-        return exactMatch || null;
+        return conversations.length> 0 ? conversations : null;
     }
 
 

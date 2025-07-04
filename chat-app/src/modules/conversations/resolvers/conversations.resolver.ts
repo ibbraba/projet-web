@@ -8,9 +8,9 @@ import {UpdateConversationInput} from "../dto/update-conversation";
 export class ConversationsResolver {
     constructor(private readonly conversationsService: ConversationsService) {}
 
-    @Query(() => [Conversation], { name: 'getConversations', description: 'Get all conversations' })
-    async getConversations() {
-        return this.conversationsService.findAll();
+    @Query(() => [Conversation], { name: 'getUserConversations', description: 'Get all conversations' })
+    async getUserConversations(@Args('userId') userId: string) {
+        return this.conversationsService.findUserConversations(userId);
     }
 
     @Query(() => Conversation, { name: 'getCurrentConversation', description: 'Get current conversation' })
