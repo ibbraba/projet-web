@@ -29,6 +29,9 @@ docker compose up -d
 
 ### Partie API - Nest.js & GraphQL 
 
+L'API NestJS sert d’intermédiaire centralisé entre le frontend et le broker de messages (RabbitMQ) pour orchestrer les requêtes CRUD des différents services métiers. Elle expose des endpoints GraphQL en approche Code First, permettant de définir les schémas et résolveurs directement en TypeScript pour une meilleure maintenabilité et productivité. Grâce à cette architecture, elle gère efficacement les opérations de lecture/écriture tout en assurant une communication asynchrone avec les microservices via le broker, offrant ainsi une solution scalable et performante.
+
+
 ### Broker RabbitMQ 
 
 Le broker RabbitMQ permet d'échager des messages entre l'API et le worker qui effectue des operations en base de données. Il est utilisé pour assurer le découplage entre l'API et la couche de persistance et permet d'initialiser un grand nombre de workers selon la charge de travail de notre application. 
