@@ -6,13 +6,23 @@ import { UserStatus } from '../enums/user-status.enum';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let rabbitMQService: Partial<Record<keyof RabbitMQService, jest.Mock>>;
+  let rabbitMQService: {
+    sendWithReply: jest.Mock;
+  };
+
+  const fakeUser = {
+    id: '123',
+    username: 'newuser',
+    mail: 'newuser@test.com',
+    status: UserStatus.ONLINE,
+    lastSeen: new Date(),
+    createdAt: new Date(),
+    isAdmin: false,
+  };
 
   beforeEach(async () => {
-    // Mock des méthodes de RabbitMQService
     rabbitMQService = {
-      send: jest.fn().mockResolvedValue(undefined),
-      sendWithReply: jest.fn().mockResolvedValue({ serviceName: 'MockService', valid: true }),
+      sendWithReply: jest.fn().mockResolvedValue(fakeUser),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -25,66 +35,33 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
   });
 
-  describe('updateLastSeen', () => {
-    it('should send a last seen update message to RabbitMQ', async () => {
-      // Préparer un utilisateur
-      const userId = '123';
-      // On ajoute un utilisateur dans le tableau interne "users"
-      (service as any).users.push({
-        id: userId,
-        username: 'test',
-        email: 'test@test.com',
-        status: UserStatus.ONLINE,
-        lastSeen: new Date(),
-        createdAt: new Date(),
-        isAdmin: false,
-      });
-
-      await service.updateLastSeen(userId);
-
-      expect(rabbitMQService.send).toHaveBeenCalledTimes(1);
-      expect(rabbitMQService.send).toHaveBeenCalledWith(
-        'user_updates',
-        expect.objectContaining({
-          eventType: 'LAST_SEEN_UPDATE',
-          userId: userId,
-          timestamp: expect.any(String),
-        }),
-      );
-    });
-
-    it('should throw if user not found', async () => {
-      await expect(service.updateLastSeen('non-existent-id')).rejects.toThrow();
-      expect(rabbitMQService.send).not.toHaveBeenCalled();
-    });
-  });
-
   describe('create', () => {
     it('should create a user and send a creation message with reply', async () => {
       const input: CreateUserInput = {
         username: 'newuser',
-        email: 'newuser@test.com',
+        mail: 'newuser@test.com',
         password: 'password123',
-        isAdmin: false,
+        firstName: undefined,
+        name: undefined,
+        phone: undefined,
       };
 
       const user = await service.create(input);
 
       expect(user).toMatchObject({
+        id: '123',
         username: input.username,
-        email: input.email,
-        isAdmin: input.isAdmin,
+        mail: input.mail,
       });
 
       expect(rabbitMQService.sendWithReply).toHaveBeenCalledTimes(1);
       expect(rabbitMQService.sendWithReply).toHaveBeenCalledWith(
-        'user_creation',
+        'user.queue',
+        'user.response',
+        'create',
         expect.objectContaining({
-          user: expect.objectContaining({
-            id: user.id,
-            username: user.username,
-            email: user.email,
-          }),
+          username: input.username,
+          mail: input.mail,
         }),
       );
     });
