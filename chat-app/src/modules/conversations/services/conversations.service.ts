@@ -12,7 +12,7 @@ export class ConversationsService {
     async create(input: CreateConversationInput): Promise<Conversation> {
         const conversation: Conversation = {
             id: Date.now().toString(),
-            participants: input.participantIds,
+            participantIds: input.participantIds,
             title: input.title,
             lastMessage: null,
             unreadCount: 0,

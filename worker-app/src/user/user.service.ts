@@ -93,6 +93,32 @@ export class UserService implements OnModuleInit {
                     await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
                 }
                 break;
+
+            case 'login':
+                try {
+                    const loginResponse = await this.loginUser(req.user.username, req.user.password);
+                    console.log(this.logServiceName + `User with username ${req.user.username} logged in`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", loginResponse)
+                } catch (error) {
+                    console.error(this.logServiceName + "Error logging in user: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }
+                break;
+
+            case 'findByEmail':
+                try {
+                    const user = await this.prisma.user.findUnique({
+                        where : { mail: req.user.mail },
+                    });
+                    if (!user) {
+                        throw new Error(`User with email ${req.user.mail} not found`);
+                    }
+                    console.log(this.logServiceName + `User with email ${req.user.mail} found`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", user);
+                } catch (error) {
+                    console.error(this.logServiceName + "Error finding user by email: ", error);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                }
         }
     }
 
@@ -129,6 +155,17 @@ export class UserService implements OnModuleInit {
 
     async remove(id: string): Promise<User> {
         return this.prisma.user.delete({ where: { id } });
+    }
+
+    async loginUser(username: string, password: string): Promise<User | null> {
+        const user = await this.prisma.user.findUnique({
+            where: { username, password },
+        
+        });
+        if (!user) {
+            throw Error("Invalid credentials"); // or throw an error if you prefer
+        }
+        return user;
     }
 
     /*

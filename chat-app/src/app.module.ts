@@ -4,6 +4,7 @@ import {UsersModule} from "./modules/users/users.module";
 import {ConversationsModule} from "./modules/conversations/conversations.module";
 import {MessagesModule} from "./modules/messages/messages.module";
 import {ApolloDriver} from "@nestjs/apollo";
+import {AuthModule} from "./auth/auth.module";
 
 
 @Module({
@@ -16,6 +17,7 @@ import {ApolloDriver} from "@nestjs/apollo";
     UsersModule,          // Import des modules
     ConversationsModule,  // → Leurs resolvers sont chargés automatiquement
     MessagesModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

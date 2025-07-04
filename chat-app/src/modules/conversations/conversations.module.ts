@@ -11,4 +11,8 @@ import {pubSubProvider} from "../../common/pubsub.provider";
         pubSubProvider,
     ],
 })
-export class ConversationsModule {}
+export class ConversationsModule {
+    constructor() {
+        console.log('Conversation module initialized'); 
+    }
+}

@@ -10,12 +10,21 @@ export class CreateUserInput {
 
     @Field()
     @IsEmail()
-    email: string;
+    mail: string;
 
     @Field()
     @MinLength(8)
     password: string;
 
-    @Field()
-    isAdmin: boolean = false;
+    @Field({ nullable: true })
+    @MaxLength(50)
+    firstName?: string;
+
+    @Field({ nullable: true })
+    @MaxLength(50)
+    name?: string;
+
+    @Field({ nullable: true })
+    @MaxLength(15)  
+    phone?: string;
 }

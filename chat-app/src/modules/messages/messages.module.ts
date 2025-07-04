@@ -14,4 +14,9 @@ import {RabbitMQModule} from "../../core/rabbitmq/rabbitmq.module";
         pubSubProvider,
     ],
 })
-export class MessagesModule {}
+export class MessagesModule {
+    constructor() {
+        console.log('Message module initialized');
+        
+    }
+}

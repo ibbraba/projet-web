@@ -19,4 +19,8 @@ import {RabbitMQModule} from "../../core/rabbitmq/rabbitmq.module";
         },
     ],
 })
-export class UsersModule {}
+export class UsersModule {
+    constructor() {
+        console.log('UsersModule initialized');        
+    }
+}
