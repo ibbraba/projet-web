@@ -33,7 +33,7 @@ const Chat = () => {
     },
     {
       id: 4,
-      text: "Sonia\nAa",
+      text: "Marie",
       date: "09/11/2022 13:20",
       isReceived: true
     }
@@ -46,7 +46,7 @@ const Chat = () => {
         <div className="contact-info">
           <div className="contact-avatar"></div>
           <div>
-            <h2>Selvia Bell</h2>
+            <h2>Marie Curie</h2>
             <p className="status">En ligne</p>
           </div>
         </div>

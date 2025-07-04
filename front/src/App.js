@@ -22,6 +22,7 @@ const App = () => {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/chat" element={<Index />} />
           <Route path="/editprofile" element={<Profile />} />
+          <Route path="/chat/:id" element={<Index />} />
           {/* Add more routes as needed */}
         </Routes>
       </BrowserRouter>

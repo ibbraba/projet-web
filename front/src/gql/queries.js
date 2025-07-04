@@ -7,11 +7,9 @@ export const GET_USERS = gql`
     getUsers {
       id
       username
-      email
-      lastSeen
-      status
-      avatarUrl
-      isAdmin
+      mail
+      name
+      firstName
     }
   }
 `;

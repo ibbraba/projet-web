@@ -105,3 +105,56 @@
 .unread .conversation-time {
   color: #008069;
 }
+
+.user-dropdown {
+  background: #fff;
+  border: 1px solid #ccc;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 10;
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem;
+}
+
+.user-dropdown-item {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.user-dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.conversation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  position: relative; /* enlever si position absolute sur icône */
+}
+
+.add-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  /* enlever si position absolute pour éviter superposition */
+  /* position: relative; */
+  z-index: 1; /* au cas où */
+}
+
+/* Pour que la liste des utilisateurs soit bien en dessous */
+.user-dropdown {
+  margin-top: 10px; /* espace sous le header */
+  max-height: 200px; /* limite la hauteur */
+  overflow-y: auto;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 0; /* dessous l'icône */
+  position: relative; /* éviter overlap */
+}
+
