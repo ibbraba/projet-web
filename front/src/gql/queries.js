@@ -1,7 +1,6 @@
-// src/graphql-hooks.js
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { gql, useMutation, useQuery } from '@apollo/client';
 
-// --- QUERIES ---
+// 🔹 GETTERS
 
 export const GET_USERS = gql`
   query GetUsers {
@@ -17,23 +16,6 @@ export const GET_USERS = gql`
     }
   }
 `;
-export const useGetUsers = () => useQuery(GET_USERS);
-
-export const GET_ME = gql`
-  query GetMe {
-    getMe {
-      id
-      username
-      email
-      lastSeen
-      status
-      createdAt
-      avatarUrl
-      isAdmin
-    }
-  }
-`;
-export const useGetMe = () => useQuery(GET_ME);
 
 export const GET_USER = gql`
   query GetUser($id: String!) {
@@ -49,111 +31,67 @@ export const GET_USER = gql`
     }
   }
 `;
-export const useGetUser = (id) =>
-  useQuery(GET_USER, {
-    variables: { id },
-    skip: !id,
-  });
 
 export const GET_CONVERSATIONS = gql`
   query GetConversations {
     getConversations {
       id
+      title
       participantIds
       participants {
         id
         username
         avatarUrl
       }
-      title
-      unreadCount
       lastMessage
+      unreadCount
       createdAt
       updatedAt
     }
   }
 `;
-export const useGetConversations = () => useQuery(GET_CONVERSATIONS);
 
 export const GET_CURRENT_CONVERSATION = gql`
   query GetCurrentConversation($conversationId: String!) {
     getCurrentConversation(conversationId: $conversationId) {
       id
+      title
       participantIds
       participants {
         id
         username
         avatarUrl
       }
-      title
-      unreadCount
       lastMessage
+      unreadCount
       createdAt
       updatedAt
     }
   }
 `;
-export const useGetCurrentConversation = (conversationId) =>
-  useQuery(GET_CURRENT_CONVERSATION, {
-    variables: { conversationId },
-    skip: !conversationId,
-  });
 
-export const GET_MESSAGES = gql`
-  query GetMessages($conversationId: String!, $limit: Float) {
-    getMessages(conversationId: $conversationId, limit: $limit) {
-      id
-      content
-      status
-      createdAt
-      updatedAt
-      sender {
-        id
-        username
-        avatarUrl
-      }
-      conversation {
-        id
-        title
-      }
-    }
-  }
-`;
-export const useGetMessages = (conversationId, limit) =>
-  useQuery(GET_MESSAGES, {
-    variables: { conversationId, limit },
-    skip: !conversationId,
-  });
-
-// --- MUTATIONS ---
+// 🔹 MUTATIONS
 
 export const CREATE_USER = gql`
   mutation CreateUser($input: CreateUserInput!) {
     createUser(input: $input) {
       id
       username
-      email
-      isAdmin
-      avatarUrl
+      mail
     }
   }
 `;
-export const useCreateUser = () => useMutation(CREATE_USER);
 
 export const CREATE_CONVERSATION = gql`
   mutation CreateConversation($input: CreateConversationInput!) {
     createConversation(input: $input) {
       id
-      participantIds
-      participants {
-        id
-        username
-      }
       title
+      participantIds
+      createdAt
     }
   }
 `;
-export const useCreateConversation = () => useMutation(CREATE_CONVERSATION);
 
 export const SEND_MESSAGE = gql`
   mutation SendMessage($input: SendMessageInput!) {
@@ -162,18 +100,16 @@ export const SEND_MESSAGE = gql`
       content
       status
       createdAt
+      conversation {
+        id
+      }
       sender {
         id
         username
       }
-      conversation {
-        id
-        title
-      }
     }
   }
 `;
-export const useSendMessage = () => useMutation(SEND_MESSAGE);
 
 export const LOGIN = gql`
   mutation Login($input: LoginInput!) {
@@ -183,10 +119,20 @@ export const LOGIN = gql`
         id
         username
         email
-        avatarUrl
-        isAdmin
       }
     }
   }
 `;
+
+// 🔹 HOOKS
+
+export const useGetUsers = () => useQuery(GET_USERS);
+export const useGetUser = (id) => useQuery(GET_USER, { variables: { id } });
+export const useGetConversations = () => useQuery(GET_CONVERSATIONS);
+export const useGetCurrentConversation = (conversationId) =>
+  useQuery(GET_CURRENT_CONVERSATION, { variables: { conversationId } });
+
+export const useCreateUser = () => useMutation(CREATE_USER);
+export const useCreateConversation = () => useMutation(CREATE_CONVERSATION);
+export const useSendMessage = () => useMutation(SEND_MESSAGE);
 export const useLogin = () => useMutation(LOGIN);

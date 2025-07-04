@@ -8,7 +8,7 @@ import './Form.css';
 const Form = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
+  const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
   
   const [createUser, { loading, error, data }] = useCreateUser();
@@ -17,7 +17,7 @@ const Form = () => {
     e.preventDefault();
 
     try {
-      await createUser({ variables: { input: { username, email, password, isAdmin: false } } });
+      await createUser({ variables: { input: { username, mail, password, isAdmin: false } } });
       // Après création, tu peux rediriger
       navigate('/');
     } catch (err) {
@@ -44,8 +44,8 @@ const Form = () => {
               type="text" 
               placeholder="e-mail" 
               className="signup-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={mail}
+              onChange={(e) => setMail(e.target.value)}
               required
             />
             <div className="input-line"></div>

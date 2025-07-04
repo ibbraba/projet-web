@@ -23,7 +23,7 @@ const ProfilePanel = () => {
     <div className="profile-panel">
       {/* En-tête du profil */}
       <div className="profile-header">
-        <h1>Selvia Bell</h1>
+        <h1>John Doe</h1>
         <FiMoreVertical className="more-icon" />
       </div>
 
@@ -45,7 +45,7 @@ const ProfilePanel = () => {
             <FiMail className="field-icon" />
             <div className="field-content">
               <div className="field-label">Email</div>
-              <div className="field-value">selvia.bell@example.com</div>
+              <div className="field-value">john.doe@example.com</div>
             </div>
           </div>
           

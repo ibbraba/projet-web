@@ -1,43 +1,44 @@
+// Chat.js
 import React from 'react';
 import { FiMoreVertical, FiPaperclip, FiMic, FiSmile } from 'react-icons/fi';
 import './Chat.css';
 import { useNavigate } from 'react-router-dom';
 
+// 🔁 Données de messages stockées dans un tableau séparé
+const initialMessages = [
+  {
+    id: 1,
+    text: "Bienvenue sur le chat ! Vous pouvez maintenant discuter librement.",
+    date: "03/07/2025 09:00",
+    isSystem: true
+  },
+  {
+    id: 2,
+    text: "Salut ! Tu es dispo pour une réunion aujourd'hui ?",
+    date: "03/07/2025 09:15",
+    isReceived: true
+  },
+  {
+    id: 3,
+    text: "Oui, je suis libre vers 10h. On fait ça sur Zoom ?",
+    date: "03/07/2025 09:17",
+    isSent: true
+  },
+  {
+    id: 4,
+    text: "Parfait, je t'envoie le lien dans quelques minutes.",
+    date: "03/07/2025 09:18",
+    isReceived: true
+  }
+];
 
 const Chat = () => {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-  
-    const handleEditProfile = (e) => {
-      e.preventDefault();
-      navigate('/editprofile'); // Redirection vers la page de profil
-    };
-  const messages = [
-    {
-      id: 1,
-      text: "Vous pouvez maintenant vous envoyer des messages, vous appeler et voir les informations concernant le statut En ligne et la lecture des messages.",
-      date: "09/11/2022 12:09",
-      isSystem: true
-    },
-    {
-      id: 2,
-      text: "Comment vas tu ??",
-      date: "09/11/2022 13:16",
-      isReceived: true
-    },
-    {
-      id: 3,
-      text: "Ça va\nTu sais qui c'est ??",
-      date: "09/11/2022 13:18",
-      isSent: true
-    },
-    {
-      id: 4,
-      text: "Sonia\nAa",
-      date: "09/11/2022 13:20",
-      isReceived: true
-    }
-  ];
+  const handleEditProfile = (e) => {
+    e.preventDefault();
+    navigate('/editprofile');
+  };
 
   return (
     <div className="chat-panel">
@@ -46,7 +47,7 @@ const Chat = () => {
         <div className="contact-info">
           <div className="contact-avatar"></div>
           <div>
-            <h2>Selvia Bell</h2>
+            <h2>Jean Pierre</h2>
             <p className="status">En ligne</p>
           </div>
         </div>
@@ -57,7 +58,7 @@ const Chat = () => {
 
       {/* Messages Container */}
       <div className="messages-container">
-        {messages.map((message) => (
+        {initialMessages.map((message) => (
           <div 
             key={message.id} 
             className={`message ${message.isSystem ? 'system' : ''} ${message.isReceived ? 'received' : ''} ${message.isSent ? 'sent' : ''}`}

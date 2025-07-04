@@ -13,6 +13,7 @@ import {AuthModule} from "./auth/auth.module";
       autoSchemaFile: true, // Génère le schéma automatiquement
       playground: true,
       driver: ApolloDriver,
+      cors: { origin: 'http://localhost:3000', credentials: true,}, // Désactive CORS pour éviter les problèmes de sécurité
     }),
     UsersModule,          // Import des modules
     ConversationsModule,  // → Leurs resolvers sont chargés automatiquement

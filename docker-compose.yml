@@ -21,7 +21,7 @@ services:
     - front
     - rabbitmq
     environment:
-      NODE_ENV: production
+      NODE_ENV: developpement
       RABBITMQ_URL: amqp://admin:password123@rabbitmq:5672/
       PORT: 3000
     volumes:
@@ -38,7 +38,8 @@ services:
       - rabbitmq
     environment:
       RABBITMQ_URL: amqp://admin:password123@rabbitmq:5672/
-    
+    env_file:
+      - .env
 
   rabbitmq:
     image: rabbitmq:3.12-management  # Management plugin included

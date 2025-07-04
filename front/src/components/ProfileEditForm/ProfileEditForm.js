@@ -32,7 +32,7 @@ const ProfileEditForm = () => {
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Selvia Bell"
+                defaultValue="John Doe"
               />
             </div>
 
@@ -44,7 +44,7 @@ const ProfileEditForm = () => {
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Selvia"
+                defaultValue="John"
               />
             </div>
 
@@ -56,7 +56,7 @@ const ProfileEditForm = () => {
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Bell"
+                defaultValue="Doe"
               />
             </div>
           </div>
@@ -73,7 +73,7 @@ const ProfileEditForm = () => {
               <input
                 type="email"
                 className="edit-input"
-                defaultValue="selvia.bell@example.com"
+                defaultValue="john.doe@example.com"
               />
             </div>
 
