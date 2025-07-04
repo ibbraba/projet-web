@@ -36,9 +36,9 @@ export class UsersResolver {
         }
         */
         // 2. Un utilisateur peut voir son propre profil complet
-        if (currentUser.id === id) {
+        //if (currentUser.id === id) {
             return this.usersService.findUserById(id);
-        }
+        //}
 
         // 3. Pour les autres cas: retourner seulement les informations publiques
         /*

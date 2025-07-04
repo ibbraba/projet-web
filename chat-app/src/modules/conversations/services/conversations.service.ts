@@ -49,6 +49,9 @@ export class ConversationsService {
             id: conversationId
         };
         const conversation = await this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findOne', request);
+        if (conversation || conversation.length === 0) {
+            throw new NotFoundException(`No conversations found with ID ${conversationId}`);
+        }
         return conversation;
     }
 
