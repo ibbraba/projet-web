@@ -30,7 +30,7 @@ model User {
 model Message {
   id               String        @id @default(uuid())
   content          String
-  sendAt           DateTime      @default(now())
+  createdAt        DateTime      @default(now())
   senderId         String
   conversationId   String
 

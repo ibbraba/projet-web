@@ -14,7 +14,7 @@ export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
     @Query(() => [User], { name: 'getUsers', description: 'Fetch all users', })
-    @UseGuards(GqlAuthGuard, GqlAdminGuard) // Double protection
+    //@UseGuards(GqlAuthGuard, GqlAdminGuard) // Double protection
     async getUsers() {
         return this.usersService.findAll();
     }

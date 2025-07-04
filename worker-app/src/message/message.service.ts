@@ -59,7 +59,7 @@ export class MessagesService implements OnModuleInit {
                     await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", updateResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error updating message: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message } , requestId);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
 
@@ -128,7 +128,11 @@ export class MessagesService implements OnModuleInit {
                 content: data.content,
                 senderId: data.senderId,
                 conversationId: data.conversationId,
-                sendAt: new Date()
+                createdAt: new Date(),
+            },
+            include: {
+                sender: true, 
+                conversation : true// Optional: to return the sender data in the response
             },
         });
     }
@@ -146,29 +150,29 @@ export class MessagesService implements OnModuleInit {
         return this.prisma.message.delete({ where: { id } });
     }
 
-     /*
-        //Test method TODO : Delete
-        async testPublishMessage1() {
-            await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
-                operation: "create",
-                message: {
-                    content: "Hello ca va ?",
-                    senderId: "0d95023e-2912-4504-891b-63cb6a7f5e02",
-                    conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
-                },
-            });
-        }
-    
-        //Test method TODO : Delete
-        async testPublshMessage2() {
-            await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
-                operation: "create",
-                message: {
-                    content: "Bien et toi? ",
-                    senderId: "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3",
-                    conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
-                },
-            });
-        }
-        */
+    /*
+       //Test method TODO : Delete
+       async testPublishMessage1() {
+           await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
+               operation: "create",
+               message: {
+                   content: "Hello ca va ?",
+                   senderId: "0d95023e-2912-4504-891b-63cb6a7f5e02",
+                   conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
+               },
+           });
+       }
+   
+       //Test method TODO : Delete
+       async testPublshMessage2() {
+           await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
+               operation: "create",
+               message: {
+                   content: "Bien et toi? ",
+                   senderId: "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3",
+                   conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
+               },
+           });
+       }
+       */
 }
