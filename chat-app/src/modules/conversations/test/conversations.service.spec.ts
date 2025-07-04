@@ -34,8 +34,6 @@ describe('ConversationsService - Integration', () => {
     const fakeConversation = {
       id: 'abc',
       ...input,
-      lastMessage: null,
-      unreadCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -47,9 +45,8 @@ describe('ConversationsService - Integration', () => {
     expect(conversation).toHaveProperty('id');
     expect(conversation.participantIds).toEqual(input.participantIds);
     expect(conversation.title).toBe(input.title);
-    expect(conversation.lastMessage).toBeNull();
-    expect(conversation.unreadCount).toBe(0);
     expect(conversation.createdAt).toBeInstanceOf(Date);
+    expect(conversation.updatedAt).toBeInstanceOf(Date);
   });
 
   it('should return all conversations', async () => {
@@ -58,8 +55,6 @@ describe('ConversationsService - Integration', () => {
         id: 'conv1',
         participantIds: ['user1', 'user2'],
         title: 'Conversation 1',
-        lastMessage: null,
-        unreadCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -81,8 +76,6 @@ describe('ConversationsService - Integration', () => {
     const mockConversation = {
       id: 'abc',
       ...input,
-      lastMessage: null,
-      unreadCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -96,7 +89,6 @@ describe('ConversationsService - Integration', () => {
   });
 
   it('should throw NotFoundException if conversation not found', async () => {
-    // On renvoie un tableau vide (qui provoque NotFoundException selon la condition dans le service)
     mockRabbitMQService.sendWithReply.mockResolvedValue([]);
 
     await expect(
