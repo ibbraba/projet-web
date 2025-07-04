@@ -6,7 +6,7 @@ import {User} from "../../users/models/user.model";
 export class UpdateConversationInput {
     @Field(() => [ID])
     @IsNotEmpty()
-    participantIds: string;
+    participantIds: string[];
 
     @Field()
     @IsNotEmpty()
