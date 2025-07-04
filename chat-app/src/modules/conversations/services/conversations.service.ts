@@ -5,6 +5,7 @@ import {CreateConversationInput} from "../dto/create-conversation.input";
 import { RabbitMQService } from '../../../core/rabbitmq/rabbitmq.service';
 import { title } from 'process';
 
+
 const pubSub = new PubSub();
 
 @Injectable()

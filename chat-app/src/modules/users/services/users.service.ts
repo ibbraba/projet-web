@@ -16,7 +16,6 @@ export class UsersService {
     private readonly userQueue: string = 'user.queue';
     private readonly userReplyQueue: string = 'user.response';
     private readonly logger = new Logger(UsersService.name);
-    private readonly users: User[] = [];
 
     async create(input: CreateUserInput): Promise<User> {
         const req: any = {
