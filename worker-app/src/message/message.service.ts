@@ -37,52 +37,52 @@ export class MessagesService implements OnModuleInit {
         */
     }
 
-    async handleMessage(req: { operation: string; message: any }) {
-        const { operation, message } = req;
+    async handleMessage(req: { operation: string; data: any, requestId: string }) {
+        const { operation, data, requestId } = req;
 
         switch (operation) {
             case 'create':
                 try {
-                    const createResponse = await this.create(message);
+                    const createResponse = await this.create(data);
                     console.log(this.logServiceName + "New message created");
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", createResponse)
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", createResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error creating message: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'update':
                 try {
-                    const updateResponse = await this.update(req.message.id, req.message);
-                    console.log(this.logServiceName + `message with ID ${req.message.id} updated`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", updateResponse)
+                    const updateResponse = await this.update(data.id, data);
+                    console.log(this.logServiceName + `message with ID ${req.data.id} updated`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", updateResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error updating message: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'delete':
                 try {
-                    await this.remove(req.message.id);
-                    console.log(this.logServiceName + `message with ID  ${req.message.id} deleted`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", "Deleted with success")
+                    await this.remove(data.id);
+                    console.log(this.logServiceName + `message with ID  ${data.id} deleted`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", "Deleted with success", requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error deleting message: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'findOne':
                 try {
-                    const findOneResponse = await this.findOne(req.message.id);
+                    const findOneResponse = await this.findOne(data.id);
                     // Optionally publish result back to another queue
-                    console.log(this.logServiceName + `message with Id ${req.message.id} found`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", findOneResponse)
+                    console.log(this.logServiceName + `message with Id ${data.id} found`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", findOneResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding message: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
 
@@ -90,10 +90,10 @@ export class MessagesService implements OnModuleInit {
                 try {
                     const findAllResponse = await this.findAll();
                     console.log(this.logServiceName + "Find all request received");
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", findAllResponse)
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", findAllResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding all messages: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "message.res", { error: error.message }, requestId);
                 }
                 break;
         }
@@ -128,7 +128,11 @@ export class MessagesService implements OnModuleInit {
                 content: data.content,
                 senderId: data.senderId,
                 conversationId: data.conversationId,
-                sendAt: new Date()
+                createdAt: new Date(),
+            },
+            include: {
+                sender: true, 
+                conversation : true// Optional: to return the sender data in the response
             },
         });
     }
@@ -146,29 +150,29 @@ export class MessagesService implements OnModuleInit {
         return this.prisma.message.delete({ where: { id } });
     }
 
-     /*
-        //Test method TODO : Delete
-        async testPublishMessage1() {
-            await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
-                operation: "create",
-                message: {
-                    content: "Hello ca va ?",
-                    senderId: "0d95023e-2912-4504-891b-63cb6a7f5e02",
-                    conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
-                },
-            });
-        }
-    
-        //Test method TODO : Delete
-        async testPublshMessage2() {
-            await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
-                operation: "create",
-                message: {
-                    content: "Bien et toi? ",
-                    senderId: "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3",
-                    conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
-                },
-            });
-        }
-        */
+    /*
+       //Test method TODO : Delete
+       async testPublishMessage1() {
+           await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
+               operation: "create",
+               message: {
+                   content: "Hello ca va ?",
+                   senderId: "0d95023e-2912-4504-891b-63cb6a7f5e02",
+                   conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
+               },
+           });
+       }
+   
+       //Test method TODO : Delete
+       async testPublshMessage2() {
+           await this.rabbitmqService.publishToExchange('chatapp.exchange', 'message.req', {
+               operation: "create",
+               message: {
+                   content: "Bien et toi? ",
+                   senderId: "1c6e8d5f-8d0d-491d-bc69-2ee2cd8054a3",
+                   conversationId: "7ec6ea9b-d5f4-4f42-b226-11a2141f9700"
+               },
+           });
+       }
+       */
 }

@@ -8,7 +8,7 @@ import {PUB_SUB} from "../../../common/constants";
 import {PubSub} from "graphql-subscriptions";
 
 @Resolver(() => Message)
-@UseGuards(GqlAuthGuard)
+//@UseGuards(GqlAuthGuard)
 export class MessagesResolver {
     constructor(
         @Inject(PUB_SUB) private pubSub: PubSub,

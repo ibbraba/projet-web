@@ -1,4 +1,4 @@
-FROM node:22.1
+FROM node:22.16-slim
 
 WORKDIR /app
 
@@ -7,8 +7,9 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma generate
 RUN npm run build
 
-RUN npx prisma generate
+
 CMD ["npm", "run", "start:prod"]
 

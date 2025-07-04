@@ -35,51 +35,53 @@ export class UserService implements OnModuleInit {
 
     }
 
-    async handleUser(req: { operation: string; user : any }) {
-        const { operation, user } = req;
+    async handleUser(req: { operation: string; data : any, requestId: string }) {
+        const { operation, data, requestId } = req;
 
         switch (operation) {
             case 'create':
                 try {
-                const createResponse = await this.create(user);
+                const createResponse = await this.create(data);
                 console.log(this.logServiceName + "New user created");
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", createResponse)
+                console.log('reqId :', requestId);
+                
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", createResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error creating user: ", error);    
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }   
                 break;
 
             case 'update':
                 try {
-                const updateResponse = await this.update(req.user.id, req.user);
-                console.log(this.logServiceName + `User with ID ${req.user.id} updated`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", updateResponse)
+                const updateResponse = await this.update(data.id, data);
+                console.log(this.logServiceName + `User with ID ${data.id} updated`);
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", updateResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error updating user: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 };
                 break;
 
             case 'delete':
                 try {
-                await this.remove(req.user.id);
-                console.log(this.logServiceName + `user with ID  ${req.user.id} deleted`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", "Deleted with success")
+                await this.remove(req.data.id);
+                console.log(this.logServiceName + `user with ID  ${req.data.id} deleted`);
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", "Deleted with success", requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error deleting user: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'findOne':
                 try {
-                const findOneResponse = await this.findOne(req.user.id);
-                console.log(this.logServiceName + `user with Id ${req.user.id} found`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findOneResponse)
+                const findOneResponse = await this.findOne(req.data.id);
+                console.log(this.logServiceName + `user with Id ${req.data.id} found`);
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findOneResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding user: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }
                 break;
 
@@ -87,37 +89,37 @@ export class UserService implements OnModuleInit {
                 try {
                 const findAllResponse = await this.findAll();
                 console.log(this.logServiceName + "Find all request received");
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findAllResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", findAllResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding all users: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'login':
                 try {
-                    const loginResponse = await this.loginUser(req.user.username, req.user.password);
-                    console.log(this.logServiceName + `User with username ${req.user.username} logged in`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", loginResponse)
+                    const loginResponse = await this.loginUser(data.mail);
+                    console.log(this.logServiceName + `User with username ${req.data.username} logged in`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", loginResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error logging in user: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'findByEmail':
                 try {
                     const user = await this.prisma.user.findUnique({
-                        where : { mail: req.user.mail },
+                        where : { mail: req.data.mail },
                     });
                     if (!user) {
-                        throw new Error(`User with email ${req.user.mail} not found`);
+                        throw new Error(`User with email ${req.data.mail} not found`);
                     }
-                    console.log(this.logServiceName + `User with email ${req.user.mail} found`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", user);
+                    console.log(this.logServiceName + `User with email ${req.data.mail} found`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", user, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding user by email: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "user.res", { error: error.message }, requestId);
                 }
         }
     }
@@ -132,6 +134,9 @@ export class UserService implements OnModuleInit {
     }
 
     async create(data: UserInfoInput): Promise<User> {
+        
+     
+
         return this.prisma.user.create({
             data: {
                 username: data.username,
@@ -157,14 +162,16 @@ export class UserService implements OnModuleInit {
         return this.prisma.user.delete({ where: { id } });
     }
 
-    async loginUser(username: string, password: string): Promise<User | null> {
+    async loginUser(mail: string): Promise<User | null> {
         const user = await this.prisma.user.findUnique({
-            where: { username, password },
+            where: { mail},
         
         });
         if (!user) {
             throw Error("Invalid credentials"); // or throw an error if you prefer
         }
+
+
         return user;
     }
 

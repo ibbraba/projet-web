@@ -6,8 +6,8 @@ export class Conversation {
     @Field(() => ID)
     id: string;
 
-    @Field(() => [ID])
-    participantIds: string[];
+    @Field(() => [ID], { nullable: true })
+    participantIds?: string[];
 
     @Field()
     title: string;

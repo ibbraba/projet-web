@@ -14,7 +14,7 @@ export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
     @Query(() => [User], { name: 'getUsers', description: 'Fetch all users', })
-    @UseGuards(GqlAuthGuard, GqlAdminGuard) // Double protection
+    //@UseGuards(GqlAuthGuard, GqlAdminGuard) // Double protection
     async getUsers() {
         return this.usersService.findAll();
     }
@@ -28,7 +28,7 @@ export class UsersResolver {
     */
     // Note: getMe is commented out because it is not used in the current context.
     @Query(() => User, { name: 'getUser', description: 'Fetch one user by id', })
-    @UseGuards(GqlAuthGuard, GqlAdminGuard)
+    //@UseGuards(GqlAuthGuard, GqlAdminGuard)
     async getUser(@Args('id') id: string, @CurrentUser() currentUser: User) {
         // 1. L'admin peut tout voir
        /* if (currentUser.isAdmin) {
@@ -36,9 +36,9 @@ export class UsersResolver {
         }
         */
         // 2. Un utilisateur peut voir son propre profil complet
-        if (currentUser.id === id) {
+        //if (currentUser.id === id) {
             return this.usersService.findUserById(id);
-        }
+        //}
 
         // 3. Pour les autres cas: retourner seulement les informations publiques
         /*

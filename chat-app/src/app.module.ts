@@ -12,6 +12,7 @@ import {AuthModule} from "./auth/auth.module";
     GraphQLModule.forRoot({
       autoSchemaFile: true, // Génère le schéma automatiquement
       playground: true,
+      introspection: true, // Permet l'introspection du schéma
       driver: ApolloDriver,
     }),
     UsersModule,          // Import des modules

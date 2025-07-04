@@ -24,9 +24,9 @@ export class ConversationsResolver {
         return users.filter(user => user !== null); // Filtre les utilisateurs non trouvés
     }
 
-    @Query(() => [Conversation], { name: 'getConversations', description: 'Get all conversations' })
-    async getConversations() {
-        return this.conversationsService.findAll();
+    @Query(() => [Conversation], { name: 'getUserConversations', description: 'Get all conversations' })
+    async getUserConversations(@Args('userId') userId: string) {
+        return this.conversationsService.findUserConversations(userId);
     }
 
     @Query(() => Conversation, { name: 'getCurrentConversation', description: 'Get current conversation' })
