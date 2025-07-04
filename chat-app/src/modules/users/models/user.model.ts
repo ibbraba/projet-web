@@ -11,7 +11,7 @@ export class User {
     username: string;
 
     @Field()
-    email: string;
+    mail: string;
 
     @Exclude()
     password?: string;

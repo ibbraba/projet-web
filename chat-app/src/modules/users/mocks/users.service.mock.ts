@@ -6,7 +6,7 @@ import {UserStatus} from "../enums/user-status.enum";
 @Injectable()
 export class MockUsersService {
     private users: User[] = [
-        { id: '1', username: 'Mock User', email: 'mock@test.com', lastSeen: new Date, createdAt: new Date(), isAdmin: false, status: UserStatus.ONLINE },
+        { id: '1', username: 'Mock User', mail: 'mock@test.com', lastSeen: new Date, createdAt: new Date(), isAdmin: false, status: UserStatus.ONLINE },
     ];
 
     findAll() {

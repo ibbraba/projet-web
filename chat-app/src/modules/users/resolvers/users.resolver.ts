@@ -28,7 +28,7 @@ export class UsersResolver {
     */
     // Note: getMe is commented out because it is not used in the current context.
     @Query(() => User, { name: 'getUser', description: 'Fetch one user by id', })
-    @UseGuards(GqlAuthGuard, GqlAdminGuard)
+    //@UseGuards(GqlAuthGuard, GqlAdminGuard)
     async getUser(@Args('id') id: string, @CurrentUser() currentUser: User) {
         // 1. L'admin peut tout voir
        /* if (currentUser.isAdmin) {

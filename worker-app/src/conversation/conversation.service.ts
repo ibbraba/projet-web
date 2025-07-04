@@ -33,29 +33,29 @@ export class ConversationService implements OnModuleInit {
 
     }
 
-    async handleConversation(req: { operation: string; conversation: any }) {
-        const { operation, conversation } = req;
+    async handleConversation(req: { operation: string; data: any, requestId: string }) {
+        const { operation, data, requestId } = req;
 
         switch (operation) {
             case 'create':
                 try {
-                    const createResponse = await this.create(conversation);
+                    const createResponse = await this.create(data);
                     console.log(this.logServiceName + "New conversation created");
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", createResponse)
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", createResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error creating conversation: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }
                 break;
 
             case 'update':
                 try {
-                    const updateResponse = await this.update(req.conversation.id, req.conversation);
-                    console.log(this.logServiceName + `Conversation with ID ${req.conversation.id} updated`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", updateResponse)
+                    const updateResponse = await this.update(data.id, data);
+                    console.log(this.logServiceName + `Conversation with ID ${data.id} updated`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", updateResponse, requestId);
                 } catch (error) {
                     console.error(this.logServiceName + "Error updating conversation: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                     return;
                 }
 
@@ -63,23 +63,23 @@ export class ConversationService implements OnModuleInit {
 
             case 'delete':
                 try{
-                    await this.remove(req.conversation.id);
-                    console.log(this.logServiceName + `Conversation with ID  ${req.conversation.id} deleted`);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success")                    
+                    await this.remove(data.id);
+                    console.log(this.logServiceName + `Conversation with ID  ${data.id} deleted`);
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", "Deleted with success", requestId)                    
                 }catch (error) {
                     console.error(this.logServiceName + "Error deleting conversation: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }   
                 break;
 
             case 'findOne':
                 try {
-                const findOneResponse = await this.findOne(req.conversation.id);
-                console.log(this.logServiceName + `Conversation with Id ${req.conversation.id} found`);
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse)
+                const findOneResponse = await this.findOne(data.id);
+                console.log(this.logServiceName + `Conversation with Id ${data.id} found`);
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findOneResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding conversation: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }
                 break;
 
@@ -87,10 +87,10 @@ export class ConversationService implements OnModuleInit {
                 try {
                 const findAllResponse = await this.findAll();
                 console.log(this.logServiceName + "Find all request received");
-                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse)
+                await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", findAllResponse, requestId)
                 } catch (error) {
                     console.error(this.logServiceName + "Error finding all conversations: ", error);
-                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message });
+                    await this.rabbitmqService.publishToExchange("chatapp.exchange", "conversation.res", { error: error.message }, requestId);
                 }
                 break;
         }

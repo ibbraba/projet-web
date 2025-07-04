@@ -1,23 +1,22 @@
-# Stage 1: Build
-FROM node:22.1 AS builder
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-RUN npm run build  
-
-# Stage 2: Production
+# Use an official Node.js runtime as the base image
 FROM node:22.1
 
 WORKDIR /app
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Copy package.json and package-lock.json first (for better caching)
+COPY package*.json ./
 
+# Install dependencies (including nodemon)
+RUN npm install
+
+# Copy the rest of your app source code
+COPY . .
+
+# Install nodemon globally (optional, but helpful)
+RUN npm install -g nodemon
+
+# Expose your app port
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+# Start the app with nodemon and watch your source files
+CMD ["nodemon", "--watch", "src", "--exec", "ts-node", "src/main.ts"]
