@@ -65,5 +65,15 @@ export class ConversationsService {
         return conversation;
     }
 
-    // ... autres méthodes
+    async remove(id: string): Promise<{ deleted: boolean }> {
+        const request = { id };
+        const response = await this.rabbitmqService.sendWithReply(
+            this.conversationQueue,
+            this.conversationReplyQueue,
+            'remove',
+            request,
+        );
+        return response;
+    }
+
 }

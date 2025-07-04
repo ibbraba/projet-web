@@ -8,10 +8,6 @@ export class PublicUser {
     @Field()
     username: string;
 
-    @Field({ nullable: true })
-    avatarUrl?: string;
-
     @Field()
     createdAt: Date;
-
 }
