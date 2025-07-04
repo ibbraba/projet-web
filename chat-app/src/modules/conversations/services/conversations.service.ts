@@ -2,40 +2,68 @@ import {Injectable, NotFoundException} from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
 import {Conversation} from "../models/conversation.model";
 import {CreateConversationInput} from "../dto/create-conversation.input";
-import {RabbitMQService} from "../../../core/rabbitmq/rabbitmq.service";
+import { RabbitMQService } from '../../../core/rabbitmq/rabbitmq.service';
+import { title } from 'process';
+
 
 const pubSub = new PubSub();
 
 @Injectable()
 export class ConversationsService {
-    public readonly conversationQueue: string = 'conversation.queue';
-    public readonly conversationReplyQueue: string = 'conversation.response';
-    constructor(private readonly rabbitMQService: RabbitMQService) { }
+   constructor(private readonly rabbitmqService: RabbitMQService) {}    
+    public readonly conversationQueue : string = 'conversation.queue';
+    public readonly conversationReplyQueue : string = 'conversation.response';
+
 
     async create(input: CreateConversationInput): Promise<Conversation> {
-        const conversation: Conversation = {
-            id: Date.now().toString(),
+        const request : any = {           
             participantIds: input.participantIds,
             title: input.title,
-            lastMessage: null,
-            unreadCount: 0,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         };
 
-        return await this.rabbitMQService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'create', {conversation: conversation});
+        const conversation = this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'create', request);
+        return conversation;
     }
 
     async findAll(): Promise<Conversation[]> {
-        return await this.rabbitMQService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findAll', {});
+        const request = {
+            data: {}
+        };
+
+        const conversation = this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findAll', request);
+        return conversation;
+    }
+
+    async findUserConversations(userId: string): Promise<Conversation[]> {
+        const request = {
+            userId: userId
+        };
+        const conversations = await this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findUserConversations', request);
+        if (!conversations || conversations.length === 0) {
+            throw new NotFoundException(`No conversations found for user with ID ${userId}`);
+        }
+        return conversations;
     }
 
     async findConversationById(conversationId: string): Promise<Conversation> {
-        return await this.rabbitMQService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findOne', {conversationId: conversationId});
+        const request = {
+            id: conversationId
+        };
+        const conversation = await this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'findOne', request);
+        if (conversation || conversation.length === 0) {
+            throw new NotFoundException(`No conversations found with ID ${conversationId}`);
+        }
+        return conversation;
     }
 
-    async validate(id: string): Promise<Conversation> {
-        return this.findConversationById(id);
+    async update(id: string, title : string): Promise<Conversation> {
+        const request = {
+            id: id,
+            title  : title
+        };
+
+        const conversation = await this.rabbitmqService.sendWithReply(this.conversationQueue, this.conversationReplyQueue, 'update', request);
+        return conversation;
     }
 
     // ... autres méthodes

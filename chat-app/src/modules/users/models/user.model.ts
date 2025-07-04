@@ -11,24 +11,21 @@ export class User {
     username: string;
 
     @Field()
-    email: string;
+    mail: string;
 
     @Exclude()
     password?: string;
 
     @Field()
-    lastSeen: Date;
-
-    @Field()
-    status: UserStatus;
-
-    @Field()
     createdAt: Date;
 
+    @Field()
+    name: string;
+    
     @Field({ nullable: true })
-    avatarUrl?: string;
+    firstName?: string; 
 
-    @Field(() => Boolean, { defaultValue: false })
-    isAdmin: boolean = false;
+    @Field({ nullable: true })
+    phone?: string;
 
 }

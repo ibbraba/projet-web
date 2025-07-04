@@ -7,6 +7,7 @@ import { User } from '../models/user.model';
 import { UserStatus } from '../enums/user-status.enum';
 import { PublicUser } from '../models/public-user.model';
 import { RabbitMQService } from '../../../core/rabbitmq/rabbitmq.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +20,7 @@ export class UsersService {
     async create(input: CreateUserInput): Promise<User> {
         const req: any = {
             username: input.username,
-            password: input.password,
+            password: await bcrypt.hash(input.password, 10), // Hashing the password,
             name: input.name,
             firstName: input.firstName,
             mail: input.mail,
@@ -72,7 +73,7 @@ export class UsersService {
         try {
             const response = await this.rabbitMQService.sendWithReply(
                 this.userQueue,
-                this.userReplyQueue,
+                this.userReplyQueue,    
                 'update',
                 req,
             );
