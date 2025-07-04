@@ -20,13 +20,33 @@ docker compose up --build
 
 Attendre que tous les conteneurs soient initialisés. Le worker renverra une erreur jusqu'a l'initialisation du serveur RabbitMQ
 
+L'application sera disponible à l'adresse suivante 
 
+```
+localhost:3000
+```
 
+Le playground GraphQl est disponible pour tester des requêtes à cette adresse : 
+
+```
+localhost:5000/graphql
+```
+
+Le serveur de management est disponible à cette adresse : 
+
+```
+localhost:15672
+```
 
 ## Architecture de l'application 
 
 
 ### Partie Frontend - Interface utilisateur
+
+La partie frontend permettra aux utilisateurs de se connecter et de consulter la liste de leurs conversations. Ils pourront également créer une discussion, consulter et éditer leurs profils. 
+Une page d'inscription est disponible pour acceuillir de nouveaux utilisateurs 
+
+
 
 ### Partie API - Nest.js & GraphQL 
 
