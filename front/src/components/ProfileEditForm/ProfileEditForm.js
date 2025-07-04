@@ -1,62 +1,79 @@
-// src/components/ProfileEditForm/ProfileEditForm.js
 import React from 'react';
-import { FiUser, FiMail, FiPhone, FiUsername, FiName, FiFirstname, FiLock } from 'react-icons/fi';
+import { FiMail, FiPhone, FiLock } from 'react-icons/fi';
 import './ProfileEditForm.css';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';  // Import correct
+import { useGetUser } from '../../gql/queries'; // adapte le chemin si besoin
 
 const ProfileEditForm = () => {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-        
-       const handleChat = (e) => {
-         e.preventDefault();
-         navigate('/chat'); // Redirection vers la page de profil
-      };
+  // Récupération et décodage du token
+  const token = localStorage.getItem('token');
+
+  let userId = null;
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      // Même logique que dans ProfilePanel
+      userId = decoded.sub || decoded.id || decoded.user?.id || null;
+    } catch (err) {
+      console.error('Erreur décodage token:', err);
+      userId = null;
+    }
+  }
+
+  // Utilisation du hook pour récupérer les données user uniquement si userId existe
+  const { data, loading, error } = useGetUser(userId, { skip: !userId });
+
+  // Si besoin, tu peux afficher un loader ou message d’erreur
+  if (loading) return <p>Chargement...</p>;
+  if (error) return <p>Erreur lors du chargement du profil.</p>;
+
+  // Données utilisateur récupérées
+  const user = data?.getUser;
+
+  // Handler pour revenir au chat
+  const handleChat = (e) => {
+    e.preventDefault();
+    navigate('/chat');
+  };
 
   return (
     <div className="profile-edit-container">
       <div className="profile-edit-box">
         <h1 className="logo">Blink</h1>
         <p className="edit-subtitle">Modifier votre profil</p>
-        
+
         <form className="edit-form">
           {/* Section Informations personnelles */}
           <div className="form-section">
             <h3 className="section-title">Informations personnelles</h3>
-            
+
             <div className="form-field">
-              <label className="field-label">
-                <div className="field-icon" />
-                Nom d'utilisateur
-              </label>
+              <label className="field-label">Nom d'utilisateur</label>
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Selvia Bell"
+                defaultValue={user?.username || ''}
               />
             </div>
 
             <div className="form-field">
-              <label className="field-label">
-                <div className="field-icon" />
-                Nom
-              </label>
+              <label className="field-label">Nom</label>
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Selvia"
+                defaultValue={user?.name || ''}
               />
             </div>
 
             <div className="form-field">
-              <label className="field-label">
-                <div className="field-icon" />
-                Prenom
-              </label>
+              <label className="field-label">Prénom</label>
               <input
                 type="text"
                 className="edit-input"
-                defaultValue="Bell"
+                defaultValue={user?.firstName || ''}
               />
             </div>
           </div>
@@ -64,7 +81,7 @@ const ProfileEditForm = () => {
           {/* Section Coordonnées */}
           <div className="form-section">
             <h3 className="section-title">Coordonnées</h3>
-            
+
             <div className="form-field">
               <label className="field-label">
                 <FiMail className="field-icon" />
@@ -73,7 +90,7 @@ const ProfileEditForm = () => {
               <input
                 type="email"
                 className="edit-input"
-                defaultValue="selvia.bell@example.com"
+                defaultValue={user?.mail || ''}
               />
             </div>
 
@@ -85,7 +102,7 @@ const ProfileEditForm = () => {
               <input
                 type="tel"
                 className="edit-input"
-                defaultValue="+33 6 12 34 56 78"
+                defaultValue={user?.phone || ''}
               />
             </div>
           </div>
@@ -93,7 +110,7 @@ const ProfileEditForm = () => {
           {/* Section Sécurité */}
           <div className="form-section">
             <h3 className="section-title">Sécurité</h3>
-            
+
             <div className="form-field">
               <label className="field-label">
                 <FiLock className="field-icon" />

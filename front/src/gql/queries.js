@@ -10,7 +10,6 @@ export const GET_USERS = gql`
       email
       lastSeen
       status
-      createdAt
       avatarUrl
       isAdmin
     }
@@ -22,12 +21,9 @@ export const GET_USER = gql`
     getUser(id: $id) {
       id
       username
-      email
-      lastSeen
-      status
-      createdAt
-      avatarUrl
-      isAdmin
+      mail
+      name
+      firstName
     }
   }
 `;
@@ -45,8 +41,6 @@ export const GET_CONVERSATIONS = gql`
       }
       lastMessage
       unreadCount
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -64,8 +58,6 @@ export const GET_CURRENT_CONVERSATION = gql`
       }
       lastMessage
       unreadCount
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -75,15 +67,9 @@ export const GET_USER_CONVERSATIONS = gql`
     getUserConversations(userId: $userId) {
       id
       title
-      lastMessage
-      unreadCount
-      createdAt
-      updatedAt
       participantIds
       participants {
         id
-        username
-        avatarUrl
       }
     }
   }
@@ -107,7 +93,6 @@ export const CREATE_CONVERSATION = gql`
       id
       title
       participantIds
-      createdAt
     }
   }
 `;
@@ -118,7 +103,6 @@ export const SEND_MESSAGE = gql`
       id
       content
       status
-      createdAt
       conversation {
         id
       }
@@ -161,3 +145,9 @@ export const useGetUserConversations = (userId) => {
     skip: !userId, // utile pour éviter l'appel avant que l'ID soit dispo
   });
 };
+
+// export const useGetUser = (id, options = {}) =>
+//   useQuery(GET_USER, {
+//     variables: { id },
+//     ...options,
+//   });
