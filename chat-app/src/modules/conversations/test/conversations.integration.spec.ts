@@ -23,7 +23,7 @@ describe('ConversationsService - Integration', () => {
     const conversation = await service.create(input);
 
     expect(conversation).toHaveProperty('id');
-    expect(conversation.participants).toEqual(input.participantIds);
+    expect(conversation.participantIds).toEqual(input.participantIds); // Correction ici
     expect(conversation.title).toBe(input.title);
     expect(conversation.lastMessage).toBeNull();
     expect(conversation.unreadCount).toBe(0);

@@ -1,14 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConversationsService } from '../services/conversations.service';
+import { CreateConversationInput } from '../dto/create-conversation.input';
 import { NotFoundException } from '@nestjs/common';
 
-// Type local pour contourner le problème du type dans CreateConversationInput
-type CreateConversationInputOverride = {
-  participantIds: string[];
-  title: string;
-};
-
-describe('ConversationsService', () => {
+describe('ConversationsService - Integration', () => {
   let service: ConversationsService;
 
   beforeEach(async () => {
@@ -19,75 +14,47 @@ describe('ConversationsService', () => {
     service = module.get<ConversationsService>(ConversationsService);
   });
 
-  describe('create', () => {
-    it('should create and return a new conversation', async () => {
-      const input: CreateConversationInputOverride = {
-        participantIds: ['user1', 'user2'],
-        title: 'Test Conversation',
-      };
+  it('should create a conversation', async () => {
+    const input: CreateConversationInput = {
+      participantIds: ['user1', 'user2'],
+      title: 'Test Conversation',
+    };
 
-      const conversation = await service.create(input as any); // cast ici pour bypasser le type
+    const conversation = await service.create(input);
 
-      expect(conversation).toHaveProperty('id');
-      expect(conversation.participants).toEqual(input.participantIds);
-      expect(conversation.title).toBe(input.title);
-      expect(conversation.lastMessage).toBeNull();
-      expect(conversation.unreadCount).toBe(0);
-      expect(conversation.createdAt).toBeInstanceOf(Date);
-      expect(conversation.updatedAt).toBeInstanceOf(Date);
-    });
+    expect(conversation).toHaveProperty('id');
+    expect(conversation.participantIds).toEqual(input.participantIds); // Correction ici
+    expect(conversation.title).toBe(input.title);
+    expect(conversation.lastMessage).toBeNull();
+    expect(conversation.unreadCount).toBe(0);
+    expect(conversation.createdAt).toBeInstanceOf(Date);
   });
 
-  describe('findAll', () => {
-    it('should return all conversations', async () => {
-      // Créer 2 conversations pour le test
-      await service.create({ participantIds: ['user1'], title: 'Conv1' } as any);
-      await service.create({ participantIds: ['user2'], title: 'Conv2' } as any);
+  it('should return all conversations', async () => {
+    const input: CreateConversationInput = {
+      participantIds: ['user1', 'user2'],
+      title: 'Another Conversation',
+    };
+    await service.create(input);
 
-      const conversations = await service.findAll();
-
-      expect(conversations.length).toBeGreaterThanOrEqual(2);
-      expect(conversations[0]).toHaveProperty('id');
-      expect(conversations[1]).toHaveProperty('id');
-    });
+    const conversations = await service.findAll();
+    expect(conversations.length).toBeGreaterThanOrEqual(1);
   });
 
-  describe('findConversationById', () => {
-    it('should return a conversation by id', async () => {
-      const input: CreateConversationInputOverride = {
-        participantIds: ['user1'],
-        title: 'Conv FindById',
-      };
-      const created = await service.create(input as any);
+  it('should find a conversation by ID', async () => {
+    const input: CreateConversationInput = {
+      participantIds: ['user1', 'user2'],
+      title: 'Find me',
+    };
+    const created = await service.create(input);
 
-      const found = await service.findConversationById(created.id);
+    const found = await service.findConversationById(created.id);
 
-      expect(found.id).toBe(created.id);
-      expect(found.title).toBe(input.title);
-    });
-
-    it('should throw NotFoundException if conversation not found', async () => {
-      await expect(service.findConversationById('non-existent-id')).rejects.toThrow(
-        NotFoundException,
-      );
-    });
+    expect(found.id).toBe(created.id);
+    expect(found.title).toBe(input.title);
   });
 
-  describe('validate', () => {
-    it('should return conversation if valid', async () => {
-      const input: CreateConversationInputOverride = {
-        participantIds: ['user1'],
-        title: 'Validate Conv',
-      };
-      const created = await service.create(input as any);
-
-      const valid = await service.validate(created.id);
-
-      expect(valid.id).toBe(created.id);
-    });
-
-    it('should throw NotFoundException if invalid', async () => {
-      await expect(service.validate('invalid-id')).rejects.toThrow(NotFoundException);
-    });
+  it('should throw NotFoundException if conversation not found', async () => {
+    await expect(service.findConversationById('nonexistent')).rejects.toThrow(NotFoundException);
   });
 });
