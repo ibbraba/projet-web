@@ -45,12 +45,13 @@ Le worker consomme des messages du broker ou sont indiqués l'objet et l'operati
 Dans ce projet, on a des tests pour chaque module que l'on retrouve dans le dossier Chat-App.
 Par exemple, dans le module user, on a :
 
-    user.service.spec.ts qui est un fichier de test unitaire pour le service UserService,
+- user.service.spec.ts (qui est un fichier de test unitaire pour le service UserService)
 
-    et user.integration.spec.ts qui est un fichier de test d'intégration pour le service User.
+- user.integration.spec.ts (qui est un fichier de test d'intégration pour le service User.)
 
 On retrouve ce format de fichiers également dans les modules messages et conversation.
 Pour lancer les tests, il faut aller dans le dossier Chat-App :
+
 ```
 cd chat-app
 ```
